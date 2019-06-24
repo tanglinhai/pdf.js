@@ -106,22 +106,6 @@ function getOutputScale(ctx) {
   };
 }
 
-/* function getOffsetTop(view) {
-  let ele = view.div;
-  return ele.offsetTop + ele.clientTop +
-              (view.viewer.spreadMode === SpreadMode.ODD ||
-              view.viewer.spreadMode === SpreadMode.EVEN ?
-              ele.parentNode.offsetTop + ele.parentNode.clientTop : 0);
-}
-
-function getOffsetLeft(view) {
-  let ele = view.div;
-  return ele.offsetLeft + ele.clientLeft +
-              (view.viewer.spreadMode === SpreadMode.ODD ||
-              view.viewer.spreadMode === SpreadMode.EVEN ?
-              ele.parentNode.offsetLeft + ele.parentNode.clientLeft : 0);
-} */
-
 function getOffsetTop(view) {
   return (view.viewer.spreadMode === SpreadMode.ODD ||
               view.viewer.spreadMode === SpreadMode.EVEN ?
@@ -133,52 +117,7 @@ function getOffsetLeft(view) {
               view.viewer.spreadMode === SpreadMode.EVEN ?
               view.position.spread.realLeft : view.position.realLeft);
 }
-/**
- * Scrolls specified element into view of its parent.
- * @param {Object} element - The element to be visible.
- * @param {Object} spot - An object with optional top and left properties,
- *   specifying the offset from the top left edge.
- * @param {boolean} skipOverflowHiddenElements - Ignore elements that have
- *   the CSS rule `overflow: hidden;` set. The default is false.
- */
-/* function scrollIntoView(element, spot, skipOverflowHiddenElements = false) {
-  // Assuming offsetParent is available (it's not available when viewer is in
-  // hidden iframe or object). We have to scroll: if the offsetParent is not set
-  // producing the error. See also animationStarted.
-  let parent = element.offsetParent;
-  if (!parent) {
-    console.error('offsetParent is not set -- cannot scroll');
-    return;
-  }
-  let offsetY = element.offsetTop + element.clientTop;
-  let offsetX = element.offsetLeft + element.clientLeft;
-  while (
-    (parent.clientHeight === parent.scrollHeight &&
-                      parent.clientWidth === parent.scrollWidth) ||
-    (skipOverflowHiddenElements &&
-                        getComputedStyle(parent).overflow === 'hidden')) {
-    if (parent.dataset._scaleY) {
-      offsetY /= parent.dataset._scaleY;
-      offsetX /= parent.dataset._scaleX;
-    }
-    offsetY += parent.offsetTop;
-    offsetX += parent.offsetLeft;
-    parent = parent.offsetParent;
-    if (!parent) {
-      return; // no need to scroll
-    }
-  }
-  if (spot) {
-    if (spot.top !== undefined) {
-      offsetY += spot.top;
-    }
-    if (spot.left !== undefined) {
-      offsetX += spot.left;
-      parent.scrollLeft = offsetX;
-    }
-  }
-  parent.scrollTop = offsetY;
-} */
+
 function util_scrollIntoView(pageView, spot) {
   let viewer = pageView.viewer;
   let container = viewer.container;
@@ -216,6 +155,14 @@ function util_scrollIntoView(pageView, spot) {
   container.scrollTop = offsetY;
 }
 
+/**
+ * Scrolls specified element into view of its parent.
+ * @param {Object} element - The element to be visible.
+ * @param {Object} spot - An object with optional top and left properties,
+ *   specifying the offset from the top left edge.
+ * @param {boolean} skipOverflowHiddenElements - Ignore elements that have
+ *   the CSS rule `overflow: hidden;` set. The default is false.
+ */
 function scrollIntoView(element, spot, skipOverflowHiddenElements = false) {
   // Assuming offsetParent is available (it's not available when viewer is in
   // hidden iframe or object). We have to scroll: if the offsetParent is not set
@@ -504,27 +451,6 @@ function backtrackBeforeAllVisibleElements(index, views, top) {
   }
   return index;
 }
-/* function backtrackBeforeAllVisibleElements(index, views, top) {
-  if (index < 2) {
-    return index;
-  }
-  let elt = views[index].div;
-  let pageTop = getOffsetTop(views[index]);
-
-  if (pageTop >= top) {
-    elt = views[index - 1].div;
-    pageTop = getOffsetTop(views[index - 1]);
-  }
-
-  for (let i = index - 2; i >= 0; --i) {
-    elt = views[i].div;
-    if (getOffsetTop(views[i]) + elt.clientHeight <= pageTop) {
-      break;
-    }
-    index = i;
-  }
-  return index;
-} */
 
 /**
  * Generic helper to find out what elements are visible within a scroll pane.
@@ -553,260 +479,6 @@ function backtrackBeforeAllVisibleElements(index, views, top) {
  *   out horizontally instead of vertically
  * @returns {Object} `{ first, last, views: [{ id, x, y, view, percent }] }`
  */
-function util_getVisibleElements(scrollEl, views, sortByVisibility = false,
-                            horizontal = false) {
-  let app = window.PDFViewerApplication;
-  let viewer = app.pdfViewer;
-  let container = viewer.viewer;
-  let currPageIdx = app.page - 1;
-  const top = scrollEl.scrollTop, bottom = top + scrollEl.clientHeight;
-  const left = scrollEl.scrollLeft, right = left + scrollEl.clientWidth;
-  /**
-   * (viewer.spreadMode === SpreadMode.ODD ||
-              viewer.spreadMode === SpreadMode.EVEN ?
-              ele.parentNode.offsetTop + ele.parentNode.clientTop : 0)
-   */
-  const visible = [];
-  let currRow;
-  let currRowVisibleCount;
-  for (let i = currPageIdx; i > -1; i--) {
-    const view = views[i];
-    let p = view.position;
-    let pageTop;
-    let pageBottom;
-    let pageLeft;
-    let pageRight;
-
-    if (viewer._scrollMode === ScrollMode.HORIZONTAL) {
-      if (viewer._spreadMode === SpreadMode.NONE) {
-        if (currRow !== p.column) {
-          if (currRow !== undefined && currRowVisibleCount === 0) {
-            break;
-          }
-          if (currRow === p.column) {
-            currRowVisibleCount = 0;
-          }
-        }
-      } else {
-        if (currRow !== p.spread.column) {
-          if (currRow !== undefined && currRowVisibleCount === 0) {
-            break;
-          }
-          if (currRow === p.column) {
-            currRowVisibleCount = 0;
-          }
-        }
-      }
-    } else if (viewer._spreadMode === SpreadMode.NONE) {
-      if (currRow !== p.row) {
-        if (currRow !== undefined && currRowVisibleCount === 0) {
-          break;
-        }
-        if (currRow === p.row) {
-          currRowVisibleCount = 0;
-        }
-      }
-    } else {
-      if (currRow !== p.spread.row) {
-        if (currRow !== undefined && currRowVisibleCount === 0) {
-          break;
-        }
-        if (currRow === p.row) {
-          currRowVisibleCount = 0;
-        }
-      }
-    }
-    if (viewer._scrollMode === ScrollMode.WRAPPED) {
-      if (viewer._spreadMode === SpreadMode.NONE) {
-        pageTop = p.realTop;
-        pageBottom = pageTop + p.height;
-        pageLeft = p.realLeft;
-        pageRight = p.realLeft + p.width;
-      } else {
-        const parity = viewer.spreadMode % 2;
-        pageTop = p.spread.realTop + (p.spread.height - p.height) / 2;
-        pageBottom = pageTop + p.height;
-        pageLeft = i % 2 === parity && i > 0 ? p.spread.realLeft +
-                        views[i - 1].position.width : p.spread.realLeft;
-        pageRight = pageLeft + p.width;
-      }
-    } else if (viewer._scrollMode === ScrollMode.HORIZONTAL) {
-      let containerH = container.clientHeight;
-      if (viewer._spreadMode === SpreadMode.NONE) {
-        pageTop = p.realTop + (containerH > p.height ?
-                                        (containerH - p.height) / 2 : 0);
-        pageBottom = p.realTop + p.height;
-        pageLeft = p.realLeft;
-        pageRight = p.realLeft + p.width;
-      } else {
-        const parity = viewer.spreadMode % 2;
-        pageTop = p.spread.realTop + (p.spread.height - p.height) / 2 +
-              (containerH > p.spread.height ?
-                                  (containerH - p.spread.height) / 2 : 0);
-        pageBottom = pageTop + p.height;
-        pageLeft = i % 2 === parity && i > 0 ? p.spread.realLeft +
-                      views[i - 1].position.width : p.spread.realLeft;
-        pageRight = pageLeft + p.width;
-      }
-    } else if (viewer._spreadMode === SpreadMode.NONE) {
-      pageTop = p.realTop;
-      pageBottom = p.realTop + p.height;
-      pageLeft = p.realLeft;
-      pageRight = p.realLeft + p.width;
-    } else {
-      const parity = viewer.spreadMode % 2;
-      pageTop = p.spread.realTop + (p.spread.height - p.height) / 2;
-      pageBottom = pageTop + p.height;
-      pageLeft = i % 2 === parity && i > 0 ? p.spread.realLeft +
-                        views[i - 1].position.width : p.spread.realLeft;
-      pageRight = pageLeft + p.width;
-    }
-    if (pageBottom <= top || pageTop >= bottom ||
-        pageRight <= left || pageLeft >= right) {
-      continue;
-    }
-    currRowVisibleCount++;
-    const hiddenHeight = Math.max(0, top - pageTop) +
-                         Math.max(0, pageBottom - bottom);
-    const hiddenWidth = Math.max(0, left - pageLeft) +
-                        Math.max(0, pageRight - right);
-    const percent = ((p.height - hiddenHeight) * (p.width - hiddenWidth) *
-                     100 / p.height / p.width) | 0;
-    visible.push({
-      id: view.id,
-      x: pageLeft,
-      y: pageTop,
-      view,
-      percent,
-    });
-  }
-
-  currRow = undefined;
-  currRowVisibleCount = 0;
-  for (let i = currPageIdx + 1; i < app.pagesCount; i++) {
-    const view = views[i];
-    let p = view.position;
-    let pageTop;
-    let pageBottom;
-    let pageLeft;
-    let pageRight;
-
-    if (viewer._scrollMode === ScrollMode.HORIZONTAL) {
-      if (viewer._spreadMode === SpreadMode.NONE) {
-        if (currRow !== p.column) {
-          if (currRow !== undefined && currRowVisibleCount === 0) {
-            break;
-          }
-          if (currRow === p.column) {
-            currRowVisibleCount = 0;
-          }
-        }
-      } else {
-        if (currRow !== p.spread.column) {
-          if (currRow !== undefined && currRowVisibleCount === 0) {
-            break;
-          }
-          if (currRow === p.column) {
-            currRowVisibleCount = 0;
-          }
-        }
-      }
-    } else if (viewer._spreadMode === SpreadMode.NONE) {
-      if (currRow !== p.row) {
-        if (currRow !== undefined && currRowVisibleCount === 0) {
-          break;
-        }
-        if (currRow === p.row) {
-          currRowVisibleCount = 0;
-        }
-      }
-    } else {
-      if (currRow !== p.spread.row) {
-        if (currRow !== undefined && currRowVisibleCount === 0) {
-          break;
-        }
-        if (currRow === p.row) {
-          currRowVisibleCount = 0;
-        }
-      }
-    }
-    if (viewer._scrollMode === ScrollMode.WRAPPED) {
-      if (viewer._spreadMode === SpreadMode.NONE) {
-        pageTop = p.realTop;
-        pageBottom = pageTop + p.height;
-        pageLeft = p.realLeft;
-        pageRight = p.realLeft + p.width;
-      } else {
-        const parity = viewer.spreadMode % 2;
-        pageTop = p.spread.realTop + (p.spread.height - p.height) / 2;
-        pageBottom = pageTop + p.height;
-        pageLeft = i % 2 === parity && i > 0 ? p.spread.realLeft +
-                          views[i - 1].position.width : p.spread.realLeft;
-        pageRight = pageLeft + p.width;
-      }
-    } else if (viewer._scrollMode === ScrollMode.HORIZONTAL) {
-      let containerH = container.clientHeight;
-      if (viewer._spreadMode === SpreadMode.NONE) {
-        pageTop = p.realTop + (containerH > p.height ?
-                                          (containerH - p.height) / 2 : 0);
-        pageBottom = p.realTop + p.height;
-        pageLeft = p.realLeft;
-        pageRight = p.realLeft + p.width;
-      } else {
-        const parity = viewer.spreadMode % 2;
-        pageTop = p.spread.realTop + (p.spread.height - p.height) / 2 +
-                (containerH > p.spread.height ?
-                                    (containerH - p.spread.height) / 2 : 0);
-        pageBottom = pageTop + p.height;
-        pageLeft = i % 2 === parity && i > 0 ? p.spread.realLeft +
-                          views[i - 1].position.width : p.spread.realLeft;
-        pageRight = pageLeft + p.width;
-      }
-    } else if (viewer._spreadMode === SpreadMode.NONE) {
-      pageTop = p.realTop;
-      pageBottom = p.realTop + p.height;
-      pageLeft = p.realLeft;
-      pageRight = p.realLeft + p.width;
-    } else {
-      const parity = viewer.spreadMode % 2;
-      pageTop = p.spread.realTop + (p.spread.height - p.height) / 2;
-      pageBottom = pageTop + p.height;
-      pageLeft = i % 2 === parity && i > 0 ? p.spread.realLeft +
-                          views[i - 1].position.width : p.spread.realLeft;
-      pageRight = pageLeft + p.width;
-    }
-    if (pageBottom <= top || pageTop >= bottom ||
-        pageRight <= left || pageLeft >= right) {
-      continue;
-    }
-    currRowVisibleCount++;
-    const hiddenHeight = Math.max(0, top - pageTop) +
-                         Math.max(0, pageBottom - bottom);
-    const hiddenWidth = Math.max(0, left - pageLeft) +
-                        Math.max(0, pageRight - right);
-    const percent = ((p.height - hiddenHeight) * (p.width - hiddenWidth) *
-                     100 / p.height / p.width) | 0;
-    visible.push({
-      id: view.id,
-      x: pageLeft,
-      y: pageTop,
-      view,
-      percent,
-    });
-  }
-  const first = visible[0], last = visible[visible.length - 1];
-
-  if (sortByVisibility) {
-    visible.sort(function(a, b) {
-      let pc = a.percent - b.percent;
-      if (Math.abs(pc) > 0.001) {
-        return -pc;
-      }
-      return a.id - b.id; // ensure stability
-    });
-  }
-  return { first, last, views: visible, };
-}
 function getVisibleElements(scrollEl, views, sortByVisibility = false,
                             horizontal = false) {
   const top = scrollEl.scrollTop, bottom = top + scrollEl.clientHeight;
@@ -898,6 +570,169 @@ function getVisibleElements(scrollEl, views, sortByVisibility = false,
       id: view.id,
       x: currentWidth,
       y: currentHeight,
+      view,
+      percent,
+    });
+  }
+
+  const first = visible[0], last = visible[visible.length - 1];
+
+  if (sortByVisibility) {
+    visible.sort(function(a, b) {
+      let pc = a.percent - b.percent;
+      if (Math.abs(pc) > 0.001) {
+        return -pc;
+      }
+      return a.id - b.id; // ensure stability
+    });
+  }
+  return { first, last, views: visible, };
+}
+
+function getElementPosition(view) {
+  var viewer = view.viewer;
+  var views = viewer._pages;
+  var p = view.position;
+  var pageTop;
+  var pageBottom;
+  var pageLeft;
+  var pageRight;
+  var i = view.id - 1;
+  if(viewer._scrollMode === ScrollMode.WRAPPED) {
+    if(viewer._spreadMode === SpreadMode.NONE) { // Flat Pavement + Single Page
+      pageTop = p.realTop;
+      pageBottom = pageTop + p.height;
+      pageLeft = p.realLeft;
+      pageRight = p.realLeft + p.width;
+    } else { // Flat Pavement + Double Pages or Books
+      const parity = viewer.spreadMode % 2;
+      pageTop = p.spread.realTop + (p.spread.height - p.height) / 2;
+      pageBottom = pageTop + p.height;
+      pageLeft = i % 2 === parity && i > 0 ? p.spread.realLeft +
+                  views[i - 1].position.width : p.spread.realLeft;
+      pageRight = pageLeft + p.width;
+    }
+  } else if (viewer._scrollMode === ScrollMode.HORIZONTAL) {
+    var containerH = viewer.container.clientHeight;
+    if(viewer._spreadMode === SpreadMode.NONE) { // Horizontal + Single Page
+      pageTop = p.realTop + (containerH > p.height ?
+                                              (containerH - p.height) / 2 : 0);
+      pageBottom = p.realTop + p.height;
+      pageLeft = p.realLeft;
+      pageRight = p.realLeft + p.width;
+    } else { // Horizontal + Double Pages or Books
+      const parity = viewer.spreadMode % 2;
+      pageTop = p.spread.realTop + (p.spread.height - p.height) / 2 +
+              (containerH > p.spread.height ?
+                                        (containerH - p.spread.height) / 2 : 0);
+      pageBottom = pageTop + p.height;
+      pageLeft = i % 2 === parity && i > 0 ? p.spread.realLeft +
+                                views[i - 1].position.width : p.spread.realLeft;
+      pageRight = pageLeft + p.width;
+    }
+  } else if (viewer._spreadMode === SpreadMode.NONE) { // Vertical + single page
+    pageTop = p.realTop;
+    pageBottom = p.realTop + p.height;
+    pageLeft = p.realLeft;
+    pageRight = p.realLeft + p.width;
+  } else { // Vertical + Double Pages or Books
+    const parity = viewer.spreadMode % 2;
+    pageTop = p.spread.realTop + (p.spread.height - p.height) / 2;
+    pageBottom = pageTop + p.height;
+    pageLeft = i % 2 === parity && i > 0 ? p.spread.realLeft +
+                                views[i - 1].position.width : p.spread.realLeft;
+    pageRight = pageLeft + p.width;
+  }
+  return {
+    pageTop,
+    pageBottom,
+    pageLeft,
+    pageRight,
+    pageWidth : p.width,
+    pageHeight : p.height,
+  };
+}
+
+function util_backtrackBeforeAllVisibleElements(index, views, top) {
+  if (index < 2) {
+    return index;
+  }
+  var p = getElementPosition(views[index]);
+  let pageTop = p.pageTop;
+
+  if (pageTop >= top) {
+    p = getElementPosition(views[index - 1]);
+    pageTop = p.pageTop;
+  }
+
+  for (let i = index - 2; i >= 0; --i) {
+    p = getElementPosition(views[i]);
+    if (p.pageTop + p.pageWidth <= pageTop) {
+      break;
+    }
+    index = i;
+  }
+  return index;
+}
+
+function util_getVisibleElements(scrollEl, views, sortByVisibility = false,
+                            horizontal = false) {
+  const top = scrollEl.scrollTop, bottom = top + scrollEl.clientHeight;
+  const left = scrollEl.scrollLeft, right = left + scrollEl.clientWidth;
+
+  function isElementBottomAfterViewTop(view) {
+    var p = getElementPosition(view);
+    return p.pageBottom > top;
+  }
+  function isElementRightAfterViewLeft(view) {
+    var p = getElementPosition(view);
+    return p.pageRight > left;
+  }
+
+  const visible = [], numViews = views.length;
+  let firstVisibleElementInd = numViews === 0 ? 0 :
+    binarySearchFirstItem(views, horizontal ? isElementRightAfterViewLeft :
+                                              isElementBottomAfterViewTop);
+
+  if (firstVisibleElementInd > 0 && firstVisibleElementInd < numViews &&
+      !horizontal) {
+    firstVisibleElementInd =
+    util_backtrackBeforeAllVisibleElements(firstVisibleElementInd, views, top);
+  }
+
+  let lastEdge = horizontal ? right : -1;
+
+  for (let i = firstVisibleElementInd; i < numViews; i++) {
+    const view = views[i], p = getElementPosition(view);
+    const pageLeft = p.pageLeft;
+    const pageTop = p.pageTop;
+    const viewWidth = p.pageWidth, viewHeight = p.pageHeight;
+    const pageRight = p.pageRight;
+    const pageBottom = p.pageBottom;
+
+    if (lastEdge === -1) {
+      if (pageBottom >= bottom) {
+        lastEdge = pageBottom;
+      }
+    } else if ((horizontal ? pageLeft : pageTop) > lastEdge) {
+      break;
+    }
+
+    if (pageBottom <= top || pageTop >= bottom ||
+        pageRight <= left || pageLeft >= right) {
+      continue;
+    }
+
+    const hiddenHeight = Math.max(0, top - pageTop) +
+                         Math.max(0, pageBottom - bottom);
+    const hiddenWidth = Math.max(0, left - pageLeft) +
+                        Math.max(0, pageRight - right);
+    const percent = ((viewHeight - hiddenHeight) * (viewWidth - hiddenWidth) *
+                     100 / viewHeight / viewWidth) | 0;
+    visible.push({
+      id: view.id,
+      x: pageLeft,
+      y: pageTop,
       view,
       percent,
     });
