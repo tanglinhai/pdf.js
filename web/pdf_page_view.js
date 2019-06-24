@@ -189,20 +189,30 @@ class PDFPageView {
     let totalRotation = (this.rotation + this.pdfPageRotate) % 360;
     this.viewport = pdfPage.getViewport({ scale: this.scale * CSS_UNITS,
                                           rotation: totalRotation, });
-    // 2000 pages updated once to change the location of the page
-    if (!this.viewer.firstSizeChangedPage ||
-                  this.id < this.viewer.firstSizeChangedPage.id) {
-      let newW = Math.floor(this.viewport.width) + 10;
-      let newH = Math.floor(this.viewport.height) + 10;
-      let isWidthChange = newW !== this.position.width;
-      let isHeightChange = newH !== this.position.height;
-      if (isWidthChange || isHeightChange) {
-        this.viewer.firstSizeChangedPage = this;
-      }
-    } else if (this.id === this.viewer.pagesCount ||
-      this.id - this.viewer.firstSizeChangedPage.id > 2000) {
-      this.reposition(this.viewer.firstSizeChangedPage.id - 1);
-      this.viewer.firstSizeChangedPage = null;
+    // 300 pages updated once to change the location of the page
+    var chPaIdxs = this.viewer.sizeChangedPageIndexs;
+    var newW = Math.floor(this.viewport.width) + 10;
+    var newH = Math.floor(this.viewport.height) + 10;
+    var isWidthChange = false;
+    var isHeightChange = false;
+    if (newW !== this.position.width) {
+      isWidthChange = true;
+      this.position.width = newW;
+    }
+    if (newH !== this.position.height) {
+      isHeightChange = true;
+      this.position.height = newH;
+    }
+    if(isWidthChange || isHeightChange) {
+      chPaIdxs.push(this.id - 1);
+    }
+    if((this.id === this.viewer.pagesCount &&
+      chPaIdxs.length > 0) || chPaIdxs.length > 300) {
+      Array.prototype.min = function() {
+        return Math.min.apply({},this);
+      };
+      this.reposition(chPaIdxs.min());
+      this.viewer.sizeChangedPageIndexs = [];
     }
 
     this.stats = pdfPage.stats;
@@ -904,6 +914,7 @@ class PDFPageView {
 
     let pdfPage = this.pdfPage;
     let div = this.div;
+    let fragment = document.createDocumentFragment();
     // Wrap the canvas so that if it has a CSS transform for high DPI the
     // overflow will be hidden in Firefox.
     let canvasWrapper = document.createElement('div');
@@ -913,9 +924,9 @@ class PDFPageView {
 
     if (this.annotationLayer && this.annotationLayer.div) {
       // The annotation layer needs to stay on top.
-      div.insertBefore(canvasWrapper, this.annotationLayer.div);
+      fragment.insertBefore(canvasWrapper, this.annotationLayer.div);
     } else {
-      div.appendChild(canvasWrapper);
+      fragment.appendChild(canvasWrapper);
     }
 
     let textLayer = null;
@@ -927,9 +938,9 @@ class PDFPageView {
       textLayerDiv.style.height = canvasWrapper.style.height;
       if (this.annotationLayer && this.annotationLayer.div) {
         // The annotation layer needs to stay on top.
-        div.insertBefore(textLayerDiv, this.annotationLayer.div);
+        fragment.insertBefore(textLayerDiv, this.annotationLayer.div);
       } else {
-        div.appendChild(textLayerDiv);
+        fragment.appendChild(textLayerDiv);
       }
 
       textLayer = this.textLayerFactory.
@@ -969,9 +980,13 @@ class PDFPageView {
       this.renderingState = RenderingStates.FINISHED;
 
       if (this.loadingIconDiv) {
-        div.removeChild(this.loadingIconDiv);
+        //div.removeChild(this.loadingIconDiv);
         delete this.loadingIconDiv;
       }
+
+      div.innerHTML = '';
+      div.appendChild(fragment);
+
       this._resetZoomLayer(/* removeFromDOM = */ true);
 
       this.error = error;
@@ -1013,7 +1028,7 @@ class PDFPageView {
     if (this.annotationLayerFactory) {
       if (!this.annotationLayer) {
         this.annotationLayer = this.annotationLayerFactory.
-          createAnnotationLayerBuilder(div, pdfPage, this.imageResourcesPath,
+          createAnnotationLayerBuilder(fragment, pdfPage, this.imageResourcesPath,
                                        this.renderInteractiveForms, this.l10n);
       }
       this.annotationLayer.render(this.viewport, 'display');
