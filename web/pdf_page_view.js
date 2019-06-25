@@ -203,16 +203,25 @@ class PDFPageView {
       isHeightChange = true;
       this.position.height = newH;
     }
-    if(isWidthChange || isHeightChange) {
+    if (isWidthChange || isHeightChange) {
       chPaIdxs.push(this.id - 1);
+      if (!this.viewer.sizeChanged) {
+        this.viewer.sizeChanged = new Date().getTime();
+      }
     }
-    if((this.id === this.viewer.pagesCount &&
-      chPaIdxs.length > 0) || chPaIdxs.length > 300) {
+    if (1 === this.viewer.getPagesLeft
+      || (chPaIdxs.length > 300 && (new Date().getTime()
+        - this.viewer.sizeChanged) / 1000.0 > 1)) {
       Array.prototype.min = function() {
         return Math.min.apply({},this);
       };
-      this.reposition(chPaIdxs.min());
+      if (1 === this.viewer.getPagesLeft) {
+        this.reposition(0);
+      } else {
+        this.reposition(chPaIdxs.min());
+      }
       this.viewer.sizeChangedPageIndexs = [];
+      this.viewer.sizeChanged = 0;
     }
 
     this.stats = pdfPage.stats;
@@ -690,8 +699,12 @@ class PDFPageView {
 
     let newW = Math.floor(this.viewport.width);
     let newH = Math.floor(this.viewport.height);
-    div.style.width = newW + 'px';
-    div.style.height = newH + 'px';
+    if (parseInt(div.style.width) !== newW) {
+      div.style.width = newW + 'px';
+    }
+    if (parseInt(div.style.height) !== newH) {
+      div.style.height = newH + 'px';
+    }
 
     this.position.width = newW + 10;
     this.position.height = newH + 10;

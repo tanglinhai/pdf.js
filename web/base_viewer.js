@@ -151,6 +151,7 @@ class BaseViewer {
     this._name = this.constructor.name;
     this.container = options.container;
     this.containerW = options.container.clientWidth;
+    this.sizeChangedPageIndexs = [];
     this.viewer = options.viewer || options.container.firstElementChild;
     this.eventBus = options.eventBus || getGlobalEventBus();
     this.linkService = options.linkService || new SimpleLinkService();
