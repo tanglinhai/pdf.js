@@ -16,6 +16,7 @@
 @import url(annotation_layer_builder.css);
 .pdfViewer {
   height: 100%;
+  overflow: auto;
 }
 .pdfViewer .canvasWrapper {
   overflow: hidden;

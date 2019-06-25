@@ -167,7 +167,7 @@ html[dir='rtl'] #sidebarContent {
 }
 
 #viewerContainer {
-  overflow: auto;
+  /* overflow: auto; */
   -webkit-overflow-scrolling: touch;
   position: absolute;
   top: 32px;
@@ -838,22 +838,6 @@ html[dir='rtl'] .toolbarButton.pageDown::before {
   content: url(images/toolbarButton-zoomIn.png);
 }
 
-.toolbarButton.closePdfDocument::before,
-  .secondaryToolbarButton.closePdfDocument::before {
-    content: url(images/closePdfDocument.png);
-}
-.toolbarButton.presentationMode_exit::before,
-.secondaryToolbarButton.presentationMode_exit::before {
-    content: url(images/toolbarButton-presentationMode_exit.png);
-}
-.toolbarButton.presentationMode_column::before,
-.secondaryToolbarButton.presentationMode_column::before {
-  content: url(images/toolbarButton-presentationMode_column.png);
-}
-.toolbarButton.presentationMode_row::before,
-.secondaryToolbarButton.presentationMode_row::before {
-  content: url(images/toolbarButton-presentationMode_row.png);
-}
 .toolbarButton.presentationMode::before,
 .secondaryToolbarButton.presentationMode::before {
   content: url(images/toolbarButton-presentationMode.png);
@@ -1709,22 +1693,6 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
     content: url(images/toolbarButton-zoomOut@2x.png);
   }
 
-  .toolbarButton.closePdfDocument::before,
-  .secondaryToolbarButton.closePdfDocument::before {
-    content: url(images/closePdfDocument@2x.png);
-  }
-  .toolbarButton.presentationMode_exit::before,
-  .secondaryToolbarButton.presentationMode_exit::before {
-    content: url(images/toolbarButton-presentationMode_exit@2x.png);
-  }
-  .toolbarButton.presentationMode_column::before,
-  .secondaryToolbarButton.presentationMode_column::before {
-    content: url(images/toolbarButton-presentationMode_column@2x.png);
-  }
-  .toolbarButton.presentationMode_row::before,
-  .secondaryToolbarButton.presentationMode_row::before {
-    content: url(images/toolbarButton-presentationMode_row@2x.png);
-  }
   .toolbarButton.presentationMode::before,
   .secondaryToolbarButton.presentationMode::before {
     content: url(images/toolbarButton-presentationMode@2x.png);

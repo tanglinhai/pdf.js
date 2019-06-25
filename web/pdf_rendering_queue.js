@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-// const CLEANUP_TIMEOUT = 30000;
+const CLEANUP_TIMEOUT = 30000;
 
 const RenderingStates = {
   INITIAL: 0,
@@ -60,16 +60,15 @@ class PDFRenderingQueue {
 
   /**
    * @param {Object} currentlyVisiblePages
-   * @param {Boolean} isShouldReset
    */
-  renderHighestPriority(currentlyVisiblePages, isShouldReset) {
+  renderHighestPriority(currentlyVisiblePages) {
     if (this.idleTimeout) {
       clearTimeout(this.idleTimeout);
       this.idleTimeout = null;
     }
 
     // Pages have a higher priority than thumbnails, so check them first.
-    if (this.pdfViewer.forceRendering(currentlyVisiblePages, isShouldReset)) {
+    if (this.pdfViewer.forceRendering(currentlyVisiblePages)) {
       return;
     }
     // No pages needed rendering, so check thumbnails.
@@ -84,9 +83,9 @@ class PDFRenderingQueue {
       return;
     }
 
-    /* if (this.onIdle) {
+    if (this.onIdle) {
       this.idleTimeout = setTimeout(this.onIdle.bind(this), CLEANUP_TIMEOUT);
-    } */
+    }
   }
 
   /**

@@ -178,7 +178,7 @@ class BaseViewer {
       this.renderingQueue = options.renderingQueue;
     }
 
-    this.scroll = watchScroll(this.container, this._scrollUpdate.bind(this));
+    this.scroll = watchScroll(this.viewer, this._scrollUpdate.bind(this));
     this.presentationModeState = PresentationModeState.UNKNOWN;
     this._resetView();
 
@@ -475,7 +475,7 @@ class BaseViewer {
           pagesCapability.resolve();
           return;
         }
-        let getPagesLeft = pagesCount;
+        this.getPagesLeft = pagesCount;
         for (let pageNum = 1; pageNum <= pagesCount; ++pageNum) {
           pdfDocument.getPage(pageNum).then((pdfPage) => {
             let pageView = this._pages[pageNum - 1];
@@ -483,13 +483,13 @@ class BaseViewer {
               pageView.setPdfPage(pdfPage);
             }
             this.linkService.cachePageRef(pageNum, pdfPage.ref);
-            if (--getPagesLeft === 0) {
+            if (--this.getPagesLeft === 0) {
               pagesCapability.resolve();
             }
           }, (reason) => {
             console.error(`Unable to get page ${pageNum} to initialize viewer`,
                           reason);
-            if (--getPagesLeft === 0) {
+            if (--this.getPagesLeft === 0) {
               pagesCapability.resolve();
             }
           });
@@ -843,7 +843,7 @@ class BaseViewer {
     throw new Error('Not implemented: _updateHelper');
   }
 
-  update(isShouldReset) {
+  update() {
     let visible = this._getVisiblePages();
     if (visible.views.length === 0) {
       visible = this._getCurrentVisiblePage();
@@ -856,7 +856,7 @@ class BaseViewer {
     const newCacheSize = Math.max(DEFAULT_CACHE_SIZE, 2 * numVisiblePages + 1);
     this._buffer.resize(newCacheSize, visiblePages);
 
-    this.renderingQueue.renderHighestPriority(visible, isShouldReset);
+    this.renderingQueue.renderHighestPriority(visible);
 
     this._updateHelper(visiblePages); // Run any class-specific update code.
 
@@ -930,7 +930,7 @@ class BaseViewer {
   }
 
   _getVisiblePages() {
-    return util_getVisibleElements(this.container, this._pages, true,
+    return util_getVisibleElements(this.viewer, this._pages, true,
                               this._isScrollModeHorizontal);
   }
 
@@ -999,7 +999,7 @@ class BaseViewer {
     return promise;
   }
 
-  forceRendering(currentlyVisiblePages, isShouldReset) {
+  forceRendering(currentlyVisiblePages) {
     let visiblePages = currentlyVisiblePages || this._getVisiblePages();
     let scrollAhead = (this._isScrollModeHorizontal ?
                        this.scroll.right : this.scroll.down);
@@ -1013,10 +1013,6 @@ class BaseViewer {
         this.renderingQueue.renderView(pageView);
       });
       return true;
-    } else if (isShouldReset) {
-      for (let i = 0; i < visiblePages.views.length; i++) {
-        visiblePages.views[i].view.reset();
-      }
     }
     return false;
   }

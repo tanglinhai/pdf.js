@@ -49,7 +49,7 @@
   },
   "scripts": {
     "test": "env SKIP_BABEL=true gulp lint unittestcli externaltest",
-    "testInWindow": "set SKIP_BABEL=true && gulp unittestcli externaltest"
+    "testInWindow": "set SKIP_BABEL=true && gulp lint unittestcli externaltest"
   },
   "repository": {
     "type": "git",

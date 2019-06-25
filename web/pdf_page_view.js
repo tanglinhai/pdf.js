@@ -993,7 +993,7 @@ class PDFPageView {
       this.renderingState = RenderingStates.FINISHED;
 
       if (this.loadingIconDiv) {
-        //div.removeChild(this.loadingIconDiv);
+        // div.removeChild(this.loadingIconDiv);
         delete this.loadingIconDiv;
       }
 

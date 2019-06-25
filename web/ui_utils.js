@@ -120,7 +120,7 @@ function getOffsetLeft(view) {
 
 function util_scrollIntoView(pageView, spot) {
   let viewer = pageView.viewer;
-  let container = viewer.container;
+  let container = viewer.viewer;
   let offsetY = (viewer.spreadMode === SpreadMode.ODD ||
               viewer.spreadMode === SpreadMode.EVEN ?
               pageView.position.spread.realTop +
@@ -168,20 +168,16 @@ function scrollIntoView(element, spot, skipOverflowHiddenElements = false) {
   // hidden iframe or object). We have to scroll: if the offsetParent is not set
   // producing the error. See also animationStarted.
   let parent = element.offsetParent;
-
   if (!parent) {
     console.error('offsetParent is not set -- cannot scroll');
     return;
   }
   let offsetY = element.offsetTop + element.clientTop;
   let offsetX = element.offsetLeft + element.clientLeft;
-  while (
-    (window.PDFViewerApplication.pdfViewer.spreadMode !== 0 &&
-                       parent.getAttribute('class') === 'spread') ||
-    (parent.clientHeight === parent.scrollHeight &&
-                       parent.clientWidth === parent.scrollWidth) ||
-    (skipOverflowHiddenElements &&
-                  getComputedStyle(parent).overflow === 'hidden')) {
+  while ((parent.clientHeight === parent.scrollHeight &&
+          parent.clientWidth === parent.scrollWidth) ||
+         (skipOverflowHiddenElements &&
+          getComputedStyle(parent).overflow === 'hidden')) {
     if (parent.dataset._scaleY) {
       offsetY /= parent.dataset._scaleY;
       offsetX /= parent.dataset._scaleX;
@@ -193,7 +189,6 @@ function scrollIntoView(element, spot, skipOverflowHiddenElements = false) {
       return; // no need to scroll
     }
   }
-  parent = parent.offsetParent;
   if (spot) {
     if (spot.top !== undefined) {
       offsetY += spot.top;
