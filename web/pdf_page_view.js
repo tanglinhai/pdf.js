@@ -360,7 +360,7 @@ class PDFPageView {
           let pageH_ = page_.position.height;
           let lineMaxW_ = lineMaxW + pageW_;
 
-          if (i > 0 && lineMaxW_ > containerW) {
+          if (i > 0 && lineMaxW_ > containerW) { // a new line start
             page_.position.row = lastPage_ ? lastPage_.position.row + 1 : 0;
             page_.position.column = 0;
             page_.position.realTop = page_.position.top =
@@ -372,13 +372,13 @@ class PDFPageView {
             column0Idx = i;
 
             this.adjustLastLineLeft(i - 1, containerW);
-          } else {
+          } else { // in same line
             lineItemCount++;
 
-            if (lastPage_) {
+            if (lastPage_) { // is the first page
               page_.position.row = lastPage_.position.row;
               page_.position.column = lineItemCount - 1;
-              if (lineItemCount === 1) {
+              if (lineItemCount === 1) { // is the first column
                 let lastLineMaxH = 0;
                 for (let j = i - 1; j > -1; j--) {
                   lastLineMaxH =

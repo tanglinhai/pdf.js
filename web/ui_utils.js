@@ -584,6 +584,9 @@ function getVisibleElements(scrollEl, views, sortByVisibility = false,
   return { first, last, views: visible, };
 }
 
+// Calculate the distance between the element and the left side of the top
+// of the container according to the position information of the element
+// that has been calculated.
 function getElementPosition(view) {
   var viewer = view.viewer;
   var views = viewer._pages;

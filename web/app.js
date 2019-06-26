@@ -1558,7 +1558,6 @@ function webViewerInitialized() {
   appConfig.viewerLoadingTxt.innerHTML =
   'Download PDF files on the Internet... Please wait patiently!';
   appConfig.viewerLoading.style.display = 'block';
-
   let file;
   if (typeof PDFJSDev === 'undefined' || PDFJSDev.test('GENERIC')) {
     let queryString = document.location.search.substring(1);
@@ -1872,7 +1871,12 @@ function webViewerResize() {
     return;
   }
   let currentScaleValue = pdfViewer.currentScaleValue;
-  pdfViewer.currentScaleValue = currentScaleValue;
+  if (currentScaleValue === 'auto' ||
+      currentScaleValue === 'page-fit' ||
+      currentScaleValue === 'page-width') {
+    // Note: the scale is constant for 'page-actual'.
+    pdfViewer.currentScaleValue = currentScaleValue;
+  }
   pdfViewer.update();
 }
 
@@ -2007,6 +2011,9 @@ function webViewerFind(evt) {
     entireWord: evt.entireWord,
     highlightAll: evt.highlightAll,
     findPrevious: evt.findPrevious,
+    // If the document is large, full-text search affects performance,
+    // and more user needs are found on the current page, so this parameter
+    // is necessary to provide.
     searchInCurrPage: evt.searchInCurrPage,
   });
 }

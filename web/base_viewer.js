@@ -85,20 +85,17 @@ function PDFPageViewBuffer(size, viewer) {
   this.delSomeData = function(type) {
     let pagesCount = viewer.pdfDocument.numPages;
     if (data.length > size) {
-      let delArr = [];
       for (let i = 0; i < data.length; i++) {
         if (data[i].id !== 1 && data[i].id !== pagesCount) {
-          delArr = delArr.concat(data.splice(i, 1));
+          data.splice(i, 1).destroy();
+	  // add one page to buffer, then just delete the one and exit.
           if (type === 1) {
             break;
           }
         }
-        if (data.length - size === delArr.length) {
+        if (data.length === size) {
           break;
         }
-      }
-      for (let i = 0; i < delArr.length; i++) {
-        delArr[i].destroy();
       }
     }
   };
@@ -151,6 +148,9 @@ class BaseViewer {
     this._name = this.constructor.name;
     this.container = options.container;
     this.containerW = options.container.clientWidth;
+    // When a page is loaded in batches and the size of the page changes,
+    // the index of the page whose size changes is stored in the array is
+    // convenient to adjust the position of these pages later.
     this.sizeChangedPageIndexs = [];
     this.viewer = options.viewer || options.container.firstElementChild;
     this.eventBus = options.eventBus || getGlobalEventBus();
@@ -355,7 +355,7 @@ class BaseViewer {
       let pageView = this._pages[i];
       pageView.update(pageView.scale, rotation);
     }
-    // Reset the location of the page
+    // The position needs to be recalculated when the page rotates.
     if (this._pages.length > 0) {
       this._pages[0].repositionAllPages();
     }
@@ -475,6 +475,9 @@ class BaseViewer {
           pagesCapability.resolve();
           return;
         }
+	// Here, the logo of whether the page has been loaded is stored to
+	// facilitate the page to be loaded and recalculated once for all page
+	// locations.
         this.getPagesLeft = pagesCount;
         for (let pageNum = 1; pageNum <= pagesCount; ++pageNum) {
           pdfDocument.getPage(pageNum).then((pdfPage) => {
@@ -579,6 +582,7 @@ class BaseViewer {
           presetValue: newValue,
         });
       }
+      // Zooming in and out requires recalculating the page location.
       if (this._pages.length > 0) {
         this._pages[0].repositionAllPages();
       }
@@ -589,7 +593,7 @@ class BaseViewer {
       this._pages[i].update(newScale);
     }
     this._currentScale = newScale;
-    // Reset the location of the page
+    // Zooming in and out requires recalculating the page location.
     if (this._pages.length > 0) {
       this._pages[0].repositionAllPages();
     }
@@ -844,10 +848,7 @@ class BaseViewer {
   }
 
   update() {
-    let visible = this._getVisiblePages();
-    if (visible.views.length === 0) {
-      visible = this._getCurrentVisiblePage();
-    }
+    const visible = this._getVisiblePages();
     const visiblePages = visible.views, numVisiblePages = visiblePages.length;
 
     if (numVisiblePages === 0) {
@@ -920,6 +921,8 @@ class BaseViewer {
       y: element.offsetTop + element.clientTop,
       view: pageView,
     }; */
+    // Obtain the values of X and Y from the
+    // calculated position information.
     const view = {
       id: pageView.id,
       x: getOffsetLeft(pageView),
@@ -1003,7 +1006,8 @@ class BaseViewer {
     let visiblePages = currentlyVisiblePages || this._getVisiblePages();
     let scrollAhead = (this._isScrollModeHorizontal ?
                        this.scroll.right : this.scroll.down);
-    // Add a div DOM container for visible pages
+    // Add the visible page containers to the DOMTree before rendering
+    // the page to show the loading status.
     this._addPageDivBySpreadMode(visiblePages, true);
     let pageView = this.renderingQueue.getHighestPriority(visiblePages,
                                                           this._pages,
@@ -1143,6 +1147,7 @@ class BaseViewer {
     // Temporarily remove all the pages from the DOM.
     viewer.textContent = '';
     let pages = this._pages, maxI = pages.length;
+    // Set whether the pages are added to the DOMTree as false.
     for (let i = 0; i < maxI; i++) {
       pages[i].isDivAddedToContainer = false;
     }
@@ -1194,6 +1199,7 @@ class BaseViewer {
 
     this._updateSpreadMode(/* pageNumber = */ this._currentPageNumber);
   }
+
   /* _updateSpreadMode(pageNumber = null) {
     if (!this.pdfDocument) {
       return;
@@ -1237,6 +1243,7 @@ class BaseViewer {
     const viewer = this.viewer, pages = this._pages, maxI = pages.length;
     // Temporarily remove all the pages from the DOM.
     viewer.textContent = '';
+    // Reset page status
     for (let i = 0; i < maxI; i++) {
       pages[i].isDivAddedToContainer = false;
     }
@@ -1271,7 +1278,7 @@ class BaseViewer {
     if (!visiblePages.views.length) {
       return;
     }
-    if (this._spreadMode === SpreadMode.NONE) {
+    if (this._spreadMode === SpreadMode.NONE) { // Single page mode
       for (let i = 0; i < visiblePages.views.length; i++) {
         let view = visiblePages.views[i].view;
         if (resetCss) {
@@ -1284,7 +1291,7 @@ class BaseViewer {
           this._buffer.push(view);
         }
       }
-    } else {
+    } else { // Double-page or book model
       for (let i = 0, iMax = visiblePages.views.length; i < iMax; ++i) {
         let view = visiblePages.views[i].view;
         if (!view.isDivAddedToContainer) {
@@ -1292,6 +1299,9 @@ class BaseViewer {
           let pageIdx = view.id - 1;
           let _pages = this._pages;
           let pagesLen = this.pagesCount;
+	  // Depending on whether the brothers page has joined the domtree,
+	  // if it has joined, the parent node to the brothers node is
+	  // spread, and if not, the spreads element needs to be rebuilt.
           if (pageIdx === 0) {
             if (_pages[1].position.spread.row === view.position.spread.row &&
                 _pages[1].position.spread.column ===
