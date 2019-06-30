@@ -240,6 +240,9 @@ class PDFPageView {
       };
       if (1 === this.viewer.getPagesLeft) {
         this.reposition(0);
+        if (PDFViewerApplication.pdfSidebar.isThumbnailViewVisible) {
+          PDFViewerApplication.pdfThumbnailViewer._scrollUpdated();
+        }
       } else {
         this.reposition(chPaIdxs.min());
       }

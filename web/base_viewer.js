@@ -870,6 +870,7 @@ class BaseViewer {
       }
       if (!exist) {
         this.renderingCache[i].cancelRendering();
+        this.renderingCache[i].renderingState = RenderingStates.INITIAL;
       }
     }
 
@@ -1027,14 +1028,14 @@ class BaseViewer {
 
   forceRendering(currentlyVisiblePages) {
     let visiblePages = currentlyVisiblePages || this._getVisiblePages();
-    let scrollAhead = (this._isScrollModeHorizontal ?
-                       this.scroll.right : this.scroll.down);
+    /* let scrollAhead = (this._isScrollModeHorizontal ?
+                       this.scroll.right : this.scroll.down); */
     // Add the visible page containers to the DOMTree before rendering
     // the page to show the loading status.
     this._addPageDivBySpreadMode(visiblePages, true);
     let pageView = this.renderingQueue.getHighestPriority(visiblePages,
-                                                          this._pages,
-                                                          scrollAhead);
+                                                        this._pages/* ,
+                                                        scrollAhead */);
     if (pageView) {
       this._ensurePdfPageLoaded(pageView).then(() => {
         this.renderingQueue.renderView(pageView, visiblePages);

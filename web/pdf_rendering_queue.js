@@ -117,7 +117,7 @@ class PDFRenderingQueue {
     }
 
     // All the visible views have rendered; try to render next/previous pages.
-    /*if (scrolledDown) {
+    /* if (scrolledDown) {
       let nextPageIndex = visible.last.id;
       // IDs start at 1, so no need to add 1.
       if (views[nextPageIndex] && !this.isViewFinished(views[nextPageIndex])) {
@@ -129,7 +129,7 @@ class PDFRenderingQueue {
           !this.isViewFinished(views[previousPageIndex])) {
         return views[previousPageIndex];
       }
-    }*/
+    } */
     // Everything that needs to be rendered has been.
     return null;
   }
@@ -170,36 +170,44 @@ class PDFRenderingQueue {
       case RenderingStates.INITIAL:
         this.highestPriorityPage = view.renderingId;
         // Caching pages being rendered.
-        const renderingCache = view.viewer.renderingCache;
-        renderingCache.push(view);
+        let renderingCache;
+        if (visiblePages) {
+          renderingCache = view.viewer.renderingCache;
+          renderingCache.push(view);
+        }
         view.draw().finally(() => {
-          // Pages rendered are deleted from the cache.
-          renderingCache.splice(renderingCache.indexOf(view), 1);
-
-          // Whether the page to be rendered is in the visual area,
-          // if not, it will not be rendered.
-          const visibles = visiblePages.views;
-          if (visibles.length === 1) {
-            return;
-          }
-          for (let i = 0; i < visibles.length; i++) {
-            // Remove generated pages.
-            if (view.id === visibles[i].id) {
-              visibles.splice(i, 1);
-              i--;
-              continue;
+          // render pages
+          if (visiblePages) {
+            // Pages rendered are deleted from the cache.
+            renderingCache.splice(renderingCache.indexOf(view), 1);
+            // Whether the page to be rendered is in the visual area,
+            // if not, it will not be rendered.
+            const visibles = visiblePages.views;
+            if (visibles.length === 1) {
+              return;
             }
-            // Remove pages that do not have visible scope.
-            if (!view.isVisible(visibles[i].id)) {
-              visibles.splice(i, 1);
-              i--;
+            for (let i = 0; i < visibles.length; i++) {
+              // Remove generated pages.
+              if (view.id === visibles[i].id) {
+                visibles.splice(i, 1);
+                i--;
+                continue;
+              }
+              // Remove pages that do not have visible scope.
+              if (!view.isVisible(visibles[i].id)) {
+                visibles.splice(i, 1);
+                i--;
+              }
             }
+            if (visibles.length === 0) {
+              return;
+            }
+            const first = visibles[0], last = visibles[visibles.length - 1];
+            this.renderHighestPriority({ first, last, views: visibles, });
+          } else {
+            // render thumbnail
+            this.renderHighestPriority();
           }
-          if (visibles.length === 0) {
-            return;
-          }
-          const first = visibles[0], last = visibles[visibles.length - 1];
-          this.renderHighestPriority({ first, last, views: visibles, });
         });
         break;
     }

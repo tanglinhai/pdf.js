@@ -2068,9 +2068,11 @@ function webViewerPageChanging(evt) {
   PDFViewerApplication.toolbar.setPageNumber(page, evt.pageLabel || null);
   PDFViewerApplication.secondaryToolbar.setPageNumber(page);
 
-  if (PDFViewerApplication.pdfSidebar.isThumbnailViewVisible) {
+  // The thumbnails have not been optimized yet. There will be performance
+  // problems when two scrollbars scroll at the same time,close them first.
+  /* if (PDFViewerApplication.pdfSidebar.isThumbnailViewVisible) {
     PDFViewerApplication.pdfThumbnailViewer.scrollThumbnailIntoView(page);
-  }
+  } */
 
   // We need to update stats.
   if (typeof Stats !== 'undefined' && Stats.enabled) {

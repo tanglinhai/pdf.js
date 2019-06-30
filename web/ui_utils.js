@@ -234,7 +234,7 @@ function watchScroll(viewAreaElement, callback) {
     rAF = window.requestAnimationFrame(function viewAreaElementScrolled() {
       rAF = null;
 
-      let currentX = viewAreaElement.scrollLeft;
+      /* let currentX = viewAreaElement.scrollLeft;
       let lastX = state.lastX;
       if (currentX !== lastX) {
         state.right = currentX > lastX;
@@ -245,7 +245,7 @@ function watchScroll(viewAreaElement, callback) {
       if (currentY !== lastY) {
         state.down = currentY > lastY;
       }
-      state.lastY = currentY;
+      state.lastY = currentY; */
       callback(state);
     });
   };
@@ -253,8 +253,8 @@ function watchScroll(viewAreaElement, callback) {
   let state = {
     right: true,
     down: true,
-    lastX: viewAreaElement.scrollLeft,
-    lastY: viewAreaElement.scrollTop,
+    /* lastX: viewAreaElement.scrollLeft,
+    lastY: viewAreaElement.scrollTop, */
     _eventHandler: debounceScroll,
   };
 
