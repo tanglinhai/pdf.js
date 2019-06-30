@@ -50,6 +50,7 @@ class PDFSinglePageViewer extends BaseViewer {
     switch (viewerNodes.length) {
       case 0: // Should *only* occur on initial loading.
         this.viewer.appendChild(pageView.div);
+        pageView.isDivAddedToContainer = true;
         this.viewer._buffer.push(pageView);
         break;
       case 1: // The normal page-switching case.
@@ -63,6 +64,7 @@ class PDFSinglePageViewer extends BaseViewer {
         // Switch visible pages, and reset the viewerContainer scroll position.
         this._shadowViewer.appendChild(previousPageView.div);
         this.viewer.appendChild(pageView.div);
+        pageView.isDivAddedToContainer = true;
         this.viewer._buffer.push(pageView);
         this.container.scrollTop = 0;
         break;
@@ -90,7 +92,9 @@ class PDFSinglePageViewer extends BaseViewer {
     // Ensure that rendering always occurs, to avoid showing a blank page,
     // even if the current position doesn't change when the page is scrolled.
     this.update();
+
     super._scrollIntoView({ pageView, pageSpot, pageNumber, });
+
     // Since scrolling is tracked using `requestAnimationFrame`, update the
     // scroll direction during the next `this._scrollUpdate` invocation.
     this._updateScrollDown = () => {

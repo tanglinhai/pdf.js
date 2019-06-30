@@ -87,7 +87,7 @@ function PDFPageViewBuffer(size, viewer) {
     if (data.length > size) {
       for (let i = 0; i < data.length; i++) {
         if (data[i].id !== 1 && data[i].id !== pagesCount) {
-          data.splice(i, 1).destroy();
+          data.splice(i, 1)[0].destroy();
 	  // add one page to buffer, then just delete the one and exit.
           if (type === 1) {
             break;
@@ -146,12 +146,20 @@ class BaseViewer {
       throw new Error('Cannot initialize BaseViewer.');
     }
     this._name = this.constructor.name;
+
     this.container = options.container;
     this.containerW = options.container.clientWidth;
     // When a page is loaded in batches and the size of the page changes,
     // the index of the page whose size changes is stored in the array is
     // convenient to adjust the position of these pages later.
-    this.sizeChangedPageIndexs = [];
+    this.sizeChangedStartTimePageIndexs = [];
+    this.sizeChangedStartTime = 0;
+    // Page caching in rendering to control the operation of canceling
+    // rendering while rendering in a non-display area
+    this.renderingCache = [];
+    // Save the visual pages to compare whether the pages currently rendered
+    // and to be rendered are visible.
+    this.visiblePages = null;
     this.viewer = options.viewer || options.container.firstElementChild;
     this.eventBus = options.eventBus || getGlobalEventBus();
     this.linkService = options.linkService || new SimpleLinkService();
@@ -582,10 +590,6 @@ class BaseViewer {
           presetValue: newValue,
         });
       }
-      // Zooming in and out requires recalculating the page location.
-      if (this._pages.length > 0) {
-        this._pages[0].repositionAllPages();
-      }
       return;
     }
 
@@ -849,7 +853,25 @@ class BaseViewer {
 
   update() {
     const visible = this._getVisiblePages();
+    // Save the visual pages to compare whether the pages currently rendered
+    // and to be rendered are visible.
+    this.visiblePages = visible;
+
     const visiblePages = visible.views, numVisiblePages = visiblePages.length;
+
+    // Terminate rendering tasks that are not visible.
+    for (let i = 0; i < this.renderingCache.length; i++) {
+      let exist = false;
+      for (let j = 0; j < visiblePages.length; j++) {
+        if (this.renderingCache[i].id == visiblePages[j].id) {
+          exist = true;
+          break;
+        }
+      }
+      if (!exist) {
+        this.renderingCache[i].cancelRendering();
+      }
+    }
 
     if (numVisiblePages === 0) {
       return;
@@ -915,6 +937,7 @@ class BaseViewer {
     // NOTE: Compute the `x` and `y` properties of the current view,
     // since `this._updateLocation` depends of them being available.
     /* const element = pageView.div;
+
     const view = {
       id: pageView.id,
       x: element.offsetLeft + element.clientLeft,
@@ -1014,7 +1037,7 @@ class BaseViewer {
                                                           scrollAhead);
     if (pageView) {
       this._ensurePdfPageLoaded(pageView).then(() => {
-        this.renderingQueue.renderView(pageView);
+        this.renderingQueue.renderView(pageView, visiblePages);
       });
       return true;
     }
@@ -1144,6 +1167,12 @@ class BaseViewer {
     if (!this.pdfDocument || !pageNumber) {
       return;
     }
+
+    // Horizontal scroll display using single page mode.
+    if (scrollMode === ScrollMode.HORIZONTAL) {
+      this._spreadMode = SpreadMode.NONE;
+    }
+
     // Temporarily remove all the pages from the DOM.
     viewer.textContent = '';
     let pages = this._pages, maxI = pages.length;
@@ -1199,42 +1228,6 @@ class BaseViewer {
 
     this._updateSpreadMode(/* pageNumber = */ this._currentPageNumber);
   }
-
-  /* _updateSpreadMode(pageNumber = null) {
-    if (!this.pdfDocument) {
-      return;
-    }
-    const viewer = this.viewer, pages = this._pages;
-    // Temporarily remove all the pages from the DOM.
-    viewer.textContent = '';
-
-    if (this._spreadMode === SpreadMode.NONE) {
-      for (let i = 0, iMax = pages.length; i < iMax; ++i) {
-        viewer.appendChild(pages[i].div);
-      }
-    } else {
-      const parity = this._spreadMode - 1;
-      let spread = null;
-      for (let i = 0, iMax = pages.length; i < iMax; ++i) {
-        if (spread === null) {
-          spread = document.createElement('div');
-          spread.className = 'spread';
-          viewer.appendChild(spread);
-        } else if (i % 2 === parity) {
-          spread = spread.cloneNode(false);
-          viewer.appendChild(spread);
-        }
-        spread.appendChild(pages[i].div);
-      }
-    }
-    if (!pageNumber) {
-      return;
-    }
-    this._setCurrentPageNumber(pageNumber, */
-    /* resetCurrentPageView = */
-    /* true);
-    this.update();
-  } */
 
   _updateSpreadMode(pageNumber = null) {
     if (!this.pdfDocument) {

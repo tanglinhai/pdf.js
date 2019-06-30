@@ -1877,6 +1877,9 @@ function webViewerResize() {
     // Note: the scale is constant for 'page-actual'.
     pdfViewer.currentScaleValue = currentScaleValue;
   }
+  if (pdfViewer._pages.length > 0) {
+    pdfViewer._pages[0].repositionAllPages();
+  }
   pdfViewer.update();
 }
 
@@ -2011,10 +2014,6 @@ function webViewerFind(evt) {
     entireWord: evt.entireWord,
     highlightAll: evt.highlightAll,
     findPrevious: evt.findPrevious,
-    // If the document is large, full-text search affects performance,
-    // and more user needs are found on the current page, so this parameter
-    // is necessary to provide.
-    searchInCurrPage: evt.searchInCurrPage,
   });
 }
 
@@ -2026,8 +2025,6 @@ function webViewerFindFromUrlHash(evt) {
     entireWord: false,
     highlightAll: true,
     findPrevious: false,
-    page: evt.page,
-    searchInCurrPage: evt.searchInCurrPage,
   });
 }
 

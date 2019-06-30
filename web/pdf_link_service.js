@@ -206,8 +206,6 @@ class PDFLinkService {
         this.eventBus.dispatch('findfromurlhash', {
           source: this,
           query: params['search'].replace(/"/g, ''),
-          searchInCurrPage: params['searchincurrpage'] === 'true',
-          page: params['page'],
           phraseSearch: (params['phrase'] === 'true'),
         });
       }

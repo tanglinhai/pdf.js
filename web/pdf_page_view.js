@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import {
   approximateFraction, CSS_UNITS, DEFAULT_SCALE, getGlobalEventBus,
   getOutputScale, NullL10n, RendererType, roundToDivide, ScrollMode,
@@ -121,6 +122,7 @@ class PDFPageView {
       top: 0,
       realTop: 0,
       left: 0,
+      realLeft: 0,
       spread: this.getClonePositionSpreadObj(),
     };
     div.style.width = Math.floor(this.viewport.width) + 'px';
@@ -148,6 +150,7 @@ class PDFPageView {
           top: spread.top,
           realTop: spread.realTop,
           left: spread.left,
+          realLeft: spread.realLeft,
         };
     }
     return {
@@ -158,6 +161,7 @@ class PDFPageView {
       top: 0,
       realTop: 0,
       left: 0,
+      realLeft: 0,
     };
   }
 
@@ -182,6 +186,24 @@ class PDFPageView {
     }
   }
 
+  /**
+   * [isVisible Is the current page visible]
+   * @param {[pageId]} pageView [page view]
+   * @return {Boolean} [Is it visible?]
+   */
+  isVisible(pageId) {
+    let pId = pageId || this.id;
+    let existNewList = false;
+    let visiblePages = this.viewer.visiblePages.views;
+    for (let j = 0; j < visiblePages.length; j++) {
+      if (visiblePages[j].id === pId) {
+        existNewList = true;
+        break;
+      }
+    }
+    return existNewList;
+  }
+
   setPdfPage(pdfPage) {
     this.pdfPage = pdfPage;
     this.pdfPageRotate = pdfPage.rotate;
@@ -189,8 +211,10 @@ class PDFPageView {
     let totalRotation = (this.rotation + this.pdfPageRotate) % 360;
     this.viewport = pdfPage.getViewport({ scale: this.scale * CSS_UNITS,
                                           rotation: totalRotation, });
-    // 300 pages updated once to change the location of the page
-    var chPaIdxs = this.viewer.sizeChangedPageIndexs;
+    // When the total number of pages with size changes exceeds 300 and
+    // the start time of the first page change exceeds 300 milliseconds,
+    // the position is readjusted once.
+    var chPaIdxs = this.viewer.sizeChangedStartTimePageIndexs;
     var newW = Math.floor(this.viewport.width) + 10;
     var newH = Math.floor(this.viewport.height) + 10;
     var isWidthChange = false;
@@ -205,13 +229,12 @@ class PDFPageView {
     }
     if (isWidthChange || isHeightChange) {
       chPaIdxs.push(this.id - 1);
-      if (!this.viewer.sizeChanged) {
-        this.viewer.sizeChanged = new Date().getTime();
+      if (!this.viewer.sizeChangedStartTime) {
+        this.viewer.sizeChangedStartTime = new Date().getTime();
       }
     }
     if (1 === this.viewer.getPagesLeft
-      || (chPaIdxs.length > 300 && (new Date().getTime()
-        - this.viewer.sizeChanged) / 1000.0 > 1)) {
+      || (chPaIdxs.length > 300 && (new Date().getTime() - this.viewer.sizeChangedStartTime) > 300)){
       Array.prototype.min = function() {
         return Math.min.apply({},this);
       };
@@ -220,8 +243,8 @@ class PDFPageView {
       } else {
         this.reposition(chPaIdxs.min());
       }
-      this.viewer.sizeChangedPageIndexs = [];
-      this.viewer.sizeChanged = 0;
+      this.viewer.sizeChangedStartTimePageIndexs = [];
+      this.viewer.sizeChangedStartTime = 0;
     }
 
     this.stats = pdfPage.stats;

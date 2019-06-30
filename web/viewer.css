@@ -167,8 +167,8 @@ html[dir='rtl'] #sidebarContent {
 }
 
 #viewerContainer {
-  /* overflow: auto; */
-  -webkit-overflow-scrolling: touch;
+  /* overflow: auto;
+  -webkit-overflow-scrolling: touch; */
   position: absolute;
   top: 32px;
   right: 0;

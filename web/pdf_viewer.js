@@ -21,18 +21,6 @@ class PDFViewer extends BaseViewer {
   get _setDocumentViewerElement() {
     return shadow(this, '_setDocumentViewerElement', this.viewer);
   }
-  /* _scrollIntoView({ pageDiv, pageSpot = null, pageNumber = null, }) {
-    if (!pageSpot && !this.isInPresentationMode) {
-      const left = pageDiv.offsetLeft + pageDiv.clientLeft;
-      const right = left + pageDiv.clientWidth;
-      const { scrollLeft, clientWidth, } = this.container;
-      if (this._isScrollModeHorizontal ||
-          left < scrollLeft || right > scrollLeft + clientWidth) {
-        pageSpot = { left: 0, top: 0, };
-      }
-    }
-    super._scrollIntoView({ pageDiv, pageSpot, pageNumber, });
-  } */
 
   _scrollIntoView({ pageView, pageSpot = null, pageNumber = null, }) {
     if (!pageSpot && !this.isInPresentationMode) {

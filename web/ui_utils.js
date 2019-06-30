@@ -106,18 +106,38 @@ function getOutputScale(ctx) {
   };
 }
 
+/**
+ * [getOffsetTop Get top location values for two-page book mode and
+ * one-page mode]
+ * @param  {[type]} view [page view]
+ * @return {[type]}      [top value]
+ */
 function getOffsetTop(view) {
   return (view.viewer.spreadMode === SpreadMode.ODD ||
               view.viewer.spreadMode === SpreadMode.EVEN ?
               view.position.spread.realTop : view.position.realTop);
 }
 
+/**
+ * [getOffsetLeft Get left location values for two-page book mode and
+ * one-page mode]
+ * @param  {[type]} view [page view]
+ * @return {[type]}      [left value]
+ */
 function getOffsetLeft(view) {
   return (view.viewer.spreadMode === SpreadMode.ODD ||
               view.viewer.spreadMode === SpreadMode.EVEN ?
               view.position.spread.realLeft : view.position.realLeft);
 }
 
+/**
+ * [util_scrollIntoView Aiming at the previously calculated page location
+ * values, an efficient algorithm function is provided for page turning
+ * and rolling location.]
+ * @param  {[type]} pageView [page view]
+ * @param {Object} spot - An object with optional top and left properties,
+ *   specifying the offset from the top left edge.
+ */
 function util_scrollIntoView(pageView, spot) {
   let viewer = pageView.viewer;
   let container = viewer.viewer;
@@ -651,6 +671,15 @@ function getElementPosition(view) {
   };
 }
 
+/**
+ * [util_backtrackBeforeAllVisibleElements Basically the same as the
+ * backtrackBeforeAllVisibleElements method, Only the calculated
+ * value is based on the position in the view.]
+ * @param  {[type]} index [Same as backtrackBeforeAllVisibleElements]
+ * @param  {[type]} views [Same as backtrackBeforeAllVisibleElements]
+ * @param  {[type]} top   [Same as backtrackBeforeAllVisibleElements]
+ * @return {[type]}       [description]
+ */
 function util_backtrackBeforeAllVisibleElements(index, views, top) {
   if (index < 2) {
     return index;
@@ -673,6 +702,16 @@ function util_backtrackBeforeAllVisibleElements(index, views, top) {
   return index;
 }
 
+/**
+ * [util_getVisibleElements Basically the same as the getVisibleElements
+ * method, Only the calculated value is based on the position in the
+ * view.]
+ * @param  {[type]}  scrollEl         [Same as getVisibleElements method]
+ * @param  {[type]}  views            [Same as getVisibleElements method]
+ * @param  {Boolean} sortByVisibility [Same as getVisibleElements method]
+ * @param  {Boolean} horizontal       [Same as getVisibleElements method]
+ * @return {[type]}                   [Same as getVisibleElements method]
+ */
 function util_getVisibleElements(scrollEl, views, sortByVisibility = false,
                             horizontal = false) {
   const top = scrollEl.scrollTop, bottom = top + scrollEl.clientHeight;
