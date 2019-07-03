@@ -119,6 +119,7 @@
 .pdfPresentationMode .pdfViewer {
   margin-left: 0;
   margin-right: 0;
+  overflow: hidden;
 }
 
 .pdfPresentationMode .pdfViewer .page,
