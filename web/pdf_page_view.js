@@ -56,6 +56,7 @@ import { viewerCompatibilityParams } from './viewer_compatibility';
 
 const MAX_CANVAS_PIXELS =
                         viewerCompatibilityParams.maxCanvasPixels || 16777216;
+const PAGE_BORDER_SIZE = 9;
 
 /**
  * @implements {IRenderableView}
@@ -115,8 +116,8 @@ class PDFPageView {
     this.isDivAddedToContainer = false;
     // the page size position and spread size position
     this.position = {
-      width: Math.floor(this.viewport.width) + 10,
-      height: Math.floor(this.viewport.height) + 10,
+      width: Math.floor(this.viewport.width) + PAGE_BORDER_SIZE * 2,
+      height: Math.floor(this.viewport.height) + PAGE_BORDER_SIZE * 2,
       row: 0,
       column: 0,
       top: 0,
@@ -215,8 +216,8 @@ class PDFPageView {
     // the start time of the first page change exceeds 300 milliseconds,
     // the position is readjusted once.
     var chPaIdxs = this.viewer.sizeChangedStartTimePageIndexs;
-    var newW = Math.floor(this.viewport.width) + 10;
-    var newH = Math.floor(this.viewport.height) + 10;
+    var newW = Math.floor(this.viewport.width) + PAGE_BORDER_SIZE * 2;
+    var newH = Math.floor(this.viewport.height) + PAGE_BORDER_SIZE * 2;
     var isWidthChange = false;
     var isHeightChange = false;
     if (newW !== this.position.width) {
@@ -749,8 +750,8 @@ class PDFPageView {
       div.style.height = newH + 'px';
     }
 
-    this.position.width = newW + 10;
-    this.position.height = newH + 10;
+    this.position.width = newW + PAGE_BORDER_SIZE * 2;
+    this.position.height = newH + PAGE_BORDER_SIZE * 2;
 
     let childNodes = div.childNodes;
     let currentZoomLayerNode = (keepZoomLayer && this.zoomLayer) || null;
