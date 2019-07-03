@@ -60,15 +60,18 @@ class PDFRenderingQueue {
 
   /**
    * @param {Object} currentlyVisiblePages
+   * @param {Boolean} reInitPageContainer When updating, you need to
+   * set up a page container.
    */
-  renderHighestPriority(currentlyVisiblePages) {
+  renderHighestPriority(currentlyVisiblePages, reInitPageContainer) {
     if (this.idleTimeout) {
       clearTimeout(this.idleTimeout);
       this.idleTimeout = null;
     }
 
     // Pages have a higher priority than thumbnails, so check them first.
-    if (this.pdfViewer.forceRendering(currentlyVisiblePages)) {
+    if (this.pdfViewer.forceRendering(currentlyVisiblePages,
+                                              reInitPageContainer)) {
       return;
     }
     // No pages needed rendering, so check thumbnails.
@@ -170,40 +173,34 @@ class PDFRenderingQueue {
       case RenderingStates.INITIAL:
         this.highestPriorityPage = view.renderingId;
         // Caching pages being rendered.
-        let renderingCache;
         if (visiblePages) {
-          renderingCache = view.viewer.renderingCache;
-          renderingCache.push(view);
+          view.viewer.renderingCache.push(view);
         }
         view.draw().finally(() => {
           // render pages
           if (visiblePages) {
-            // Pages rendered are deleted from the cache.
-            renderingCache.splice(renderingCache.indexOf(view), 1);
-            // Whether the page to be rendered is in the visual area,
-            // if not, it will not be rendered.
-            const visibles = visiblePages.views;
-            if (visibles.length === 1) {
+            // Stop rendering pages in the last scroll visual area.
+            if (view.viewer.visiblePagesCache.indexOf(visiblePages) === -1) {
               return;
             }
+            // Pages rendered are deleted from the cache.
+            view.viewer.renderingCache.splice(view.viewer.renderingCache.indexOf(view), 1);
+            const visibles = visiblePages.views;
+            // Remove rendered page.
             for (let i = 0; i < visibles.length; i++) {
-              // Remove generated pages.
               if (view.id === visibles[i].id) {
                 visibles.splice(i, 1);
-                i--;
-                continue;
-              }
-              // Remove pages that do not have visible scope.
-              if (!view.isVisible(visibles[i].id)) {
-                visibles.splice(i, 1);
-                i--;
+                break;
               }
             }
+            // All pages are rendered.
             if (visibles.length === 0) {
               return;
             }
+            visiblePages.first = visibles[0];
+            visiblePages.last = visibles[visibles.length - 1];
             const first = visibles[0], last = visibles[visibles.length - 1];
-            this.renderHighestPriority({ first, last, views: visibles, });
+            this.renderHighestPriority(visiblePages);
           } else {
             // render thumbnail
             this.renderHighestPriority();

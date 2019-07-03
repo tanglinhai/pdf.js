@@ -1015,7 +1015,9 @@ let PDFViewerApplication = {
         // eslint-disable-next-line no-self-assign
         pdfViewer.currentScaleValue = pdfViewer.currentScaleValue;
         // Re-apply the initial document location.
-        this.setInitialView(hash);
+        this.setInitialView(hash, {
+          rotation, sidebarView, scrollMode, spreadMode,
+        });
       }).catch(() => {
         // Ensure that the document is always completely initialized,
         // even if there are any errors thrown above.
@@ -1206,12 +1208,21 @@ let PDFViewerApplication = {
       }
     };
     const setViewerModes = (scroll, spread) => {
-      if (isValidScrollMode(scroll)) {
-        this.pdfViewer.scrollMode = scroll;
+      // If there are illegal values, set a default value. Setting the
+      // spreadMode and scrollMode of pdfViewer at the same time will result
+      // in two layouts, so set the _scrollMode value to unify the layout
+      // when setting the spreadMode value.
+      scroll = isValidScrollMode(scroll) ? scroll : ScrollMode.VERTICAL;
+      spread = isValidScrollMode(spread) ? spread : SpreadMode.NONE;
+
+      this.pdfViewer.spreadModeBefore_HORIZONTAL = spread;
+      if (scroll === ScrollMode.HORIZONTAL) {
+        spread = SpreadMode.NONE;
       }
-      if (isValidSpreadMode(spread)) {
-        this.pdfViewer.spreadMode = spread;
-      }
+      this.pdfViewer._scrollMode = scroll;
+      this.secondaryToolbar.eventBus.dispatch('scrollmodechanged',
+                                { source: this.pdfViewer, mode: scroll, });
+      this.pdfViewer.spreadMode = spread;
     };
     this.isInitialViewSet = true;
     this.pdfSidebar.setInitialView(sidebarView);

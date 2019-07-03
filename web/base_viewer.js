@@ -148,7 +148,6 @@ class BaseViewer {
     this._name = this.constructor.name;
 
     this.container = options.container;
-    this.containerW = options.container.clientWidth;
     // When a page is loaded in batches and the size of the page changes,
     // the index of the page whose size changes is stored in the array is
     // convenient to adjust the position of these pages later.
@@ -159,7 +158,7 @@ class BaseViewer {
     this.renderingCache = [];
     // Save the visual pages to compare whether the pages currently rendered
     // and to be rendered are visible.
-    this.visiblePages = null;
+    this.visiblePagesCache = [[]];
     this.viewer = options.viewer || options.container.firstElementChild;
     this.eventBus = options.eventBus || getGlobalEventBus();
     this.linkService = options.linkService || new SimpleLinkService();
@@ -853,34 +852,53 @@ class BaseViewer {
 
   update() {
     const visible = this._getVisiblePages();
-    // Save the visual pages to compare whether the pages currently rendered
-    // and to be rendered are visible.
-    this.visiblePages = visible;
+
 
     const visiblePages = visible.views, numVisiblePages = visiblePages.length;
-
-    // Terminate rendering tasks that are not visible.
-    for (let i = 0; i < this.renderingCache.length; i++) {
-      let exist = false;
-      for (let j = 0; j < visiblePages.length; j++) {
-        if (this.renderingCache[i].id == visiblePages[j].id) {
-          exist = true;
-          break;
-        }
-      }
-      if (!exist) {
-        this.renderingCache[i].cancelRendering();
-        this.renderingCache[i].renderingState = RenderingStates.INITIAL;
-      }
-    }
 
     if (numVisiblePages === 0) {
       return;
     }
+    // If the page size of the visual area changes when scrolling, the page
+    // location needs to be recalculated
+    if (this.getPagesLeft > 1) {
+      for (let i = 0; i < numVisiblePages; i++) {
+        if (this.sizeChangedStartTimePageIndexs
+                                      .indexOf(visiblePages[i].id) !== -1) {
+          visiblePages[0].view.reposition(0);
+          this.sizeChangedStartTimePageIndexs = [];
+          this.sizeChangedStartTime = 0;
+        }
+      }
+    }
+    // If the last scrollbar is rendering a page that overlaps the latest
+    // scrollbar, remove duplicated pages from the latest scroll
+    if (this.renderingCache.length > 0) {
+      for (let i = 0; i < numVisiblePages; i++) {
+        if (this.renderingCache.indexOf(visiblePages[i]) !== -1) {
+          visiblePages.splice(i, 1);
+        }
+      }
+      visible.first = visiblePages[0];
+      visible.last = visiblePages[visiblePages.length - 1];
+      // Terminate rendering tasks that are not visible.
+      for (let i = 0; i < this.renderingCache.length; i++) {
+        if (visiblePages.indexOf(this.renderingCache[i]) === -1) {
+          this.renderingCache[i].cancelRendering();
+          this.renderingCache[i].renderingState = RenderingStates.INITIAL;
+        }
+      }
+    }
+    
+    // Save the visual pages to compare whether the pages currently rendered
+    // and to be rendered are visible.
+    this.visiblePagesCache.pop();
+    this.visiblePagesCache.push(visible);
+
     const newCacheSize = Math.max(DEFAULT_CACHE_SIZE, 2 * numVisiblePages + 1);
     this._buffer.resize(newCacheSize, visiblePages);
 
-    this.renderingQueue.renderHighestPriority(visible);
+    this.renderingQueue.renderHighestPriority(visible, true);
 
     this._updateHelper(visiblePages); // Run any class-specific update code.
 
@@ -1026,13 +1044,15 @@ class BaseViewer {
     return promise;
   }
 
-  forceRendering(currentlyVisiblePages) {
+  forceRendering(currentlyVisiblePages, reInitPageContainer) {
     let visiblePages = currentlyVisiblePages || this._getVisiblePages();
     /* let scrollAhead = (this._isScrollModeHorizontal ?
                        this.scroll.right : this.scroll.down); */
     // Add the visible page containers to the DOMTree before rendering
     // the page to show the loading status.
-    this._addPageDivBySpreadMode(visiblePages, true);
+    if (reInitPageContainer) {
+      this._addPageDivBySpreadMode(visiblePages);
+    }
     let pageView = this.renderingQueue.getHighestPriority(visiblePages,
                                                         this._pages/* ,
                                                         scrollAhead */);
@@ -1171,9 +1191,16 @@ class BaseViewer {
 
     // Horizontal scroll display using single page mode.
     if (scrollMode === ScrollMode.HORIZONTAL) {
+      // Cache the rendering mode before the horizontal mode to
+      // facilitate switching back from the horizontal mode to the
+      // flat mode or the vertical mode when the original rendering mode.
+      this.spreadModeBefore_HORIZONTAL = this._spreadMode;
       this._spreadMode = SpreadMode.NONE;
+    } else {
+      this._spreadMode = this.spreadModeBefore_HORIZONTAL || scrollMode;
     }
-
+    PDFViewerApplication.secondaryToolbar.eventBus.dispatch(
+          'spreadmodechanged', { mode: this.spreadModeBefore_HORIZONTAL });
     // Temporarily remove all the pages from the DOM.
     viewer.textContent = '';
     let pages = this._pages, maxI = pages.length;
@@ -1234,6 +1261,13 @@ class BaseViewer {
     if (!this.pdfDocument) {
       return;
     }
+    // Save the new rendering mode so that if the user switches to the
+    // horizontal mode, the value is cached in the horizontal mode
+    // method, which facilitates the original rendering mode when
+    // switching back from the horizontal mode to the flat mode or
+    // the vertical mode.
+    this.spreadModeBefore_HORIZONTAL = this._spreadMode;
+
     const viewer = this.viewer, pages = this._pages, maxI = pages.length;
     // Temporarily remove all the pages from the DOM.
     viewer.textContent = '';
