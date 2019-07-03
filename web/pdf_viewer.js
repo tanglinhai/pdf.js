@@ -26,8 +26,8 @@ class PDFViewer extends BaseViewer {
     if (!pageSpot && !this.isInPresentationMode) {
       const pageDiv = pageView.div;
       const left = getOffsetLeft(pageView);
-      const right = left + pageDiv.clientWidth;
-      const { scrollLeft, clientWidth, } = this.container;
+      const right = left + pageView.position.width;
+      const { scrollLeft, clientWidth, } = this.viewer;
       if (this._isScrollModeHorizontal ||
           left < scrollLeft || right > scrollLeft + clientWidth) {
         pageSpot = { left: 0, top: 0, };

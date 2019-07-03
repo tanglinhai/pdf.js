@@ -117,7 +117,7 @@ class PDFPageView {
     // the page size position and spread size position
     this.position = {
       width: Math.floor(this.viewport.width) + PAGE_BORDER_SIZE * 2,
-      height: Math.floor(this.viewport.height) + PAGE_BORDER_SIZE * 2,
+      height: Math.floor(this.viewport.height) + PAGE_BORDER_SIZE,
       row: 0,
       column: 0,
       top: 0,
@@ -217,7 +217,7 @@ class PDFPageView {
     // the position is readjusted once.
     var chPaIdxs = this.viewer.sizeChangedStartTimePageIndexs;
     var newW = Math.floor(this.viewport.width) + PAGE_BORDER_SIZE * 2;
-    var newH = Math.floor(this.viewport.height) + PAGE_BORDER_SIZE * 2;
+    var newH = Math.floor(this.viewport.height) + PAGE_BORDER_SIZE;
     var isWidthChange = false;
     var isHeightChange = false;
     if (newW !== this.position.width) {
@@ -751,7 +751,7 @@ class PDFPageView {
     }
 
     this.position.width = newW + PAGE_BORDER_SIZE * 2;
-    this.position.height = newH + PAGE_BORDER_SIZE * 2;
+    this.position.height = newH + PAGE_BORDER_SIZE;
 
     let childNodes = div.childNodes;
     let currentZoomLayerNode = (keepZoomLayer && this.zoomLayer) || null;

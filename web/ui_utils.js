@@ -22,6 +22,7 @@ const UNKNOWN_SCALE = 0;
 const MAX_AUTO_SCALE = 1.25;
 const SCROLLBAR_PADDING = 40;
 const VERTICAL_PADDING = 5;
+const PAGE_BORDER_SIZE = 9;
 
 const PresentationModeState = {
   UNKNOWN: 0,
@@ -172,7 +173,7 @@ function util_scrollIntoView(pageView, spot) {
       container.scrollLeft = offsetX;
     }
   }
-  container.scrollTop = offsetY;
+  container.scrollTop = offsetY + PAGE_BORDER_SIZE;
 }
 
 /**

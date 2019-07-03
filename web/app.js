@@ -2148,11 +2148,11 @@ function webViewerWheel(evt) {
       // left corner is restored. When the mouse wheel is used, the position
       // under the cursor should be restored instead.
       let scaleCorrectionFactor = currentScale / previousScale - 1;
-      let rect = pdfViewer.container.getBoundingClientRect();
+      let rect = pdfViewer.viewer.getBoundingClientRect();
       let dx = evt.clientX - rect.left;
       let dy = evt.clientY - rect.top;
-      pdfViewer.container.scrollLeft += dx * scaleCorrectionFactor;
-      pdfViewer.container.scrollTop += dy * scaleCorrectionFactor;
+      pdfViewer.viewer.scrollLeft += dx * scaleCorrectionFactor;
+      pdfViewer.viewer.scrollTop += dy * scaleCorrectionFactor;
     }
   } else {
     setZoomDisabledTimeout();

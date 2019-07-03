@@ -828,10 +828,10 @@ class BaseViewer {
     let pdfOpenParams = '#page=' + pageNumber;
     pdfOpenParams += '&zoom=' + normalizedScaleValue;
     let currentPageView = this._pages[pageNumber - 1];
-    let container = this.container;
+    let viewer = this.viewer;
     let topLeft = currentPageView.getPagePoint(
-      (container.scrollLeft - firstPage.x),
-      (container.scrollTop - firstPage.y));
+      (viewer.scrollLeft - firstPage.x),
+      (viewer.scrollTop - firstPage.y));
     let intLeft = Math.round(topLeft[0]);
     let intTop = Math.round(topLeft[1]);
     pdfOpenParams += ',' + intLeft + ',' + intTop;
