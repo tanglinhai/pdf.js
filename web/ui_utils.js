@@ -56,6 +56,30 @@ const SpreadMode = {
   EVEN: 2,
 };
 
+// Get the size of the browser scroll bar
+function getScrollbarSize() {
+  let odiv = document.createElement('div'),
+      styles = {
+          position: 'fixed',
+          top: '-1000px',
+          left: '-1000px',
+          width: '100px',
+          height: '100px',
+          overflow: 'scroll'
+      }, i, width, height;
+  for (i in styles) {
+    odiv.style[i] = styles[i];
+  }
+  document.body.appendChild(odiv);
+  width = odiv.offsetWidth - odiv.clientWidth;
+  height = odiv.offsetHeight - odiv.clientHeight;
+  odiv.remove();
+  return {
+    width,
+    height
+  };
+}
+
 // Replaces {{arguments}} with their values.
 function formatL10nValue(text, args) {
   if (!args) {
@@ -170,7 +194,7 @@ function util_scrollIntoView(pageView, spot) {
     }
     if (spot.left !== undefined) {
       offsetX += spot.left;
-      container.scrollLeft = offsetX;
+      container.scrollLeft = offsetX + PAGE_BORDER_SIZE;
     }
   }
   container.scrollTop = offsetY + PAGE_BORDER_SIZE;
@@ -607,7 +631,7 @@ function getVisibleElements(scrollEl, views, sortByVisibility = false,
 
 // Calculate the distance between the element and the left side of the top
 // of the container according to the position information of the element
-// that has been calculated.
+// that has been calculated. Do not calculate borders.
 function getElementPosition(view) {
   var viewer = view.viewer;
   var views = viewer._pages;
@@ -619,56 +643,61 @@ function getElementPosition(view) {
   var i = view.id - 1;
   if(viewer._scrollMode === ScrollMode.WRAPPED) {
     if(viewer._spreadMode === SpreadMode.NONE) { // Flat Pavement + Single Page
-      pageTop = p.realTop;
-      pageBottom = pageTop + p.height;
-      pageLeft = p.realLeft;
-      pageRight = p.realLeft + p.width;
+      pageTop = p.realTop + PAGE_BORDER_SIZE;
+      pageBottom = p.realTop + p.height;
+      pageLeft = p.realLeft + PAGE_BORDER_SIZE;
+      pageRight = p.realLeft + p.width - PAGE_BORDER_SIZE;
     } else { // Flat Pavement + Double Pages or Books
       const parity = viewer.spreadMode % 2;
-      pageTop = p.spread.realTop + (p.spread.height - p.height) / 2;
-      pageBottom = pageTop + p.height;
+      pageTop = p.spread.realTop + PAGE_BORDER_SIZE +
+                                            (p.spread.height - p.height) / 2;
+      pageBottom = pageTop + p.height - PAGE_BORDER_SIZE;
       pageLeft = i % 2 === parity && i > 0 ? p.spread.realLeft +
-                  views[i - 1].position.width : p.spread.realLeft;
-      pageRight = pageLeft + p.width;
+                  views[i - 1].position.width : 
+                  p.spread.realLeft + PAGE_BORDER_SIZE;
+      pageRight = pageLeft + p.width - PAGE_BORDER_SIZE * 2;
     }
   } else if (viewer._scrollMode === ScrollMode.HORIZONTAL) {
-    var containerH = viewer.container.clientHeight;
+    // TODO Waiting for optimization
+    var containerH = viewer.viewer.clientHeight;
     if(viewer._spreadMode === SpreadMode.NONE) { // Horizontal + Single Page
-      pageTop = p.realTop + (containerH > p.height ?
-                                              (containerH - p.height) / 2 : 0);
-      pageBottom = p.realTop + p.height;
-      pageLeft = p.realLeft;
-      pageRight = p.realLeft + p.width;
+      pageTop = p.realTop + PAGE_BORDER_SIZE +
+                      (containerH > p.height + PAGE_BORDER_SIZE ?
+                           (containerH - p.height - PAGE_BORDER_SIZE) / 2 : 0);
+      pageBottom = pageTop + p.height - PAGE_BORDER_SIZE;
+      pageLeft = p.realLeft + PAGE_BORDER_SIZE;
+      pageRight = p.realLeft + p.width - PAGE_BORDER_SIZE;
     } else { // Horizontal + Double Pages or Books
       const parity = viewer.spreadMode % 2;
-      pageTop = p.spread.realTop + (p.spread.height - p.height) / 2 +
-              (containerH > p.spread.height ?
-                                        (containerH - p.spread.height) / 2 : 0);
-      pageBottom = pageTop + p.height;
+      pageTop = p.spread.realTop + PAGE_BORDER_SIZE +(p.spread.height - p.height) / 2 +
+          (containerH > p.spread.height + PAGE_BORDER_SIZE ?
+                            (containerH - p.spread.height - PAGE_BORDER_SIZE) / 2 : 0);
+      pageBottom = pageTop + p.height - PAGE_BORDER_SIZE;
       pageLeft = i % 2 === parity && i > 0 ? p.spread.realLeft +
-                                views[i - 1].position.width : p.spread.realLeft;
-      pageRight = pageLeft + p.width;
+            views[i - 1].position.width : p.spread.realLeft + PAGE_BORDER_SIZE;
+      pageRight = pageLeft + p.width - PAGE_BORDER_SIZE * 2;
     }
   } else if (viewer._spreadMode === SpreadMode.NONE) { // Vertical + single page
-    pageTop = p.realTop;
+    pageTop = p.realTop + PAGE_BORDER_SIZE;
     pageBottom = p.realTop + p.height;
-    pageLeft = p.realLeft;
-    pageRight = p.realLeft + p.width;
+    pageLeft = p.realLeft + PAGE_BORDER_SIZE;
+    pageRight = p.realLeft + p.width - PAGE_BORDER_SIZE;
   } else { // Vertical + Double Pages or Books
     const parity = viewer.spreadMode % 2;
-    pageTop = p.spread.realTop + (p.spread.height - p.height) / 2;
-    pageBottom = pageTop + p.height;
+    pageTop = p.spread.realTop + PAGE_BORDER_SIZE +
+                                              (p.spread.height - p.height) / 2;
+    pageBottom = pageTop + p.height - PAGE_BORDER_SIZE;
     pageLeft = i % 2 === parity && i > 0 ? p.spread.realLeft +
-                                views[i - 1].position.width : p.spread.realLeft;
-    pageRight = pageLeft + p.width;
+              views[i - 1].position.width : p.spread.realLeft + PAGE_BORDER_SIZE;
+    pageRight = pageLeft + p.width - PAGE_BORDER_SIZE * 2;
   }
   return {
     pageTop,
     pageBottom,
     pageLeft,
     pageRight,
-    pageWidth : p.width,
-    pageHeight : p.height,
+    pageWidth : p.width - PAGE_BORDER_SIZE * 2,
+    pageHeight : p.height - PAGE_BORDER_SIZE,
   };
 }
 
@@ -1175,4 +1204,5 @@ export {
   getOffsetLeft,
   util_scrollIntoView,
   util_getVisibleElements,
+  getScrollbarSize,
 };

@@ -52,8 +52,8 @@
 }
 
 .pdfViewer.scrollHorizontal, .pdfViewer.scrollWrapped, .spread {
-  margin-left: 3.5px;
-  margin-right: 3.5px;
+  /* margin-left: 3.5px;
+  margin-right: 3.5px; */
   text-align: center;
 }
 
@@ -78,11 +78,10 @@
   vertical-align: middle;
 }
 
-.spread .page,
-.pdfViewer.scrollHorizontal .page,
-.pdfViewer.scrollWrapped .page {
-  margin-left: -3.5px;
-  margin-right: -3.5px;
+.spread .page:first-child,
+.pdfViewer.scrollHorizontal .page:first-child,
+.pdfViewer.scrollWrapped .page:first-child {
+  margin-right: -9px;
 }
 .spread .page {
   position: relative !important;

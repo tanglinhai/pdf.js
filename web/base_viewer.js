@@ -15,11 +15,12 @@
 
 import {
   CSS_UNITS, DEFAULT_SCALE, DEFAULT_SCALE_VALUE, getGlobalEventBus,
-  getOffsetLeft, getOffsetTop, isPortraitOrientation, isValidRotation,
-  isValidScrollMode, isValidSpreadMode, MAX_AUTO_SCALE, moveToEndOfArray,
-  NullL10n, PresentationModeState, RendererType, SCROLLBAR_PADDING,
-  scrollIntoView, ScrollMode, SpreadMode, TextLayerMode, UNKNOWN_SCALE,
-  util_getVisibleElements, util_scrollIntoView, VERTICAL_PADDING, watchScroll
+  getOffsetLeft, getOffsetTop, getScrollbarSize, isPortraitOrientation,
+  isValidRotation, isValidScrollMode, isValidSpreadMode, MAX_AUTO_SCALE,
+  moveToEndOfArray, NullL10n, PresentationModeState, RendererType,
+  SCROLLBAR_PADDING, scrollIntoView, ScrollMode, SpreadMode, TextLayerMode,
+  UNKNOWN_SCALE, util_getVisibleElements, util_scrollIntoView,
+  VERTICAL_PADDING, watchScroll
 } from './ui_utils';
 import { PDFRenderingQueue, RenderingStates } from './pdf_rendering_queue';
 import { AnnotationLayerBuilder } from './annotation_layer_builder';
@@ -148,6 +149,7 @@ class BaseViewer {
     this._name = this.constructor.name;
 
     this.container = options.container;
+    this.scrollBbarSize = getScrollbarSize();
     // When a page is loaded in batches and the size of the page changes,
     // the index of the page whose size changes is stored in the array is
     // convenient to adjust the position of these pages later.
@@ -1217,11 +1219,6 @@ class BaseViewer {
         views: [{ view: pages[0], }, { view: pages[maxI - 1], }],
       });
     }
-    let visible = this._getVisiblePages();
-    if (visible.views.length === 0) {
-      visible = this._getCurrentVisiblePage();
-    }
-    this._addPageDivBySpreadMode(visible);
     // Non-numeric scale values can be sensitive to the scroll orientation.
     // Call this before re-scrolling to the current page, to ensure that any
     // changes in scale don't move the current page.
@@ -1284,12 +1281,12 @@ class BaseViewer {
         views: [{ view: pages[0], }, { view: pages[maxI - 1], }],
       });
     }
-    let visible = this._getVisiblePages();
-    if (visible.views.length === 0) {
-      visible = this._getCurrentVisiblePage();
-    }
-    this._addPageDivBySpreadMode(visible);
     if (!pageNumber) {
+      let visible = this._getVisiblePages();
+      if (visible.views.length === 0) {
+        visible = this._getCurrentVisiblePage();
+      }
+      this._addPageDivBySpreadMode(visible);
       return;
     }
     this._setCurrentPageNumber(pageNumber, /* resetCurrentPageView = */ true);
