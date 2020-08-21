@@ -696,6 +696,7 @@ reposition(pageIdx) {
               page_.position.spread.realTop = page_.position.spread.top = 0;
               page_.position.spread.realLeft =
                                             page_.position.spread.left = 0;
+              lineMaxH = spreadMaxH;
             }
             lineMaxW = lineMaxW_;
           }

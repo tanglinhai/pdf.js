@@ -1,4 +1,4 @@
-/* Copyright 2014 Mozilla Foundation
+﻿/* Copyright 2014 Mozilla Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -836,6 +836,22 @@ html[dir='rtl'] .toolbarButton.pageDown::before {
 
 .toolbarButton.zoomIn::before {
   content: url(images/toolbarButton-zoomIn.png);
+}
+.toolbarButton.closePdfDocument::before,
+  .secondaryToolbarButton.closePdfDocument::before {
+    content: url(images/closePdfDocument.png);
+}
+.toolbarButton.presentationMode_exit::before,
+.secondaryToolbarButton.presentationMode_exit::before {
+    content: url(images/toolbarButton-presentationMode_exit.png);
+}
+.toolbarButton.presentationMode_column::before,
+.secondaryToolbarButton.presentationMode_column::before {
+  content: url(images/toolbarButton-presentationMode_column.png);
+}
+.toolbarButton.presentationMode_row::before,
+.secondaryToolbarButton.presentationMode_row::before {
+  content: url(images/toolbarButton-presentationMode_row.png);
 }
 
 .toolbarButton.presentationMode::before,
@@ -1693,6 +1709,23 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
     content: url(images/toolbarButton-zoomOut@2x.png);
   }
 
+  .toolbarButton.closePdfDocument::before,
+  .secondaryToolbarButton.closePdfDocument::before {
+    content: url(images/closePdfDocument@2x.png);
+  }
+  .toolbarButton.presentationMode_exit::before,
+  .secondaryToolbarButton.presentationMode_exit::before {
+    content: url(images/toolbarButton-presentationMode_exit@2x.png);
+  }
+  .toolbarButton.presentationMode_column::before,
+  .secondaryToolbarButton.presentationMode_column::before {
+    content: url(images/toolbarButton-presentationMode_column@2x.png);
+  }
+  .toolbarButton.presentationMode_row::before,
+  .secondaryToolbarButton.presentationMode_row::before {
+    content: url(images/toolbarButton-presentationMode_row@2x.png);
+  }
+
   .toolbarButton.presentationMode::before,
   .secondaryToolbarButton.presentationMode::before {
     content: url(images/toolbarButton-presentationMode@2x.png);
@@ -1951,3 +1984,135 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
     display: none;
   }
 }
+
+
+/* ---------------------tanglinhai start---------------------- */
+.myToolbarButton{
+  min-width: 59px;
+}
+.toolbarButton{
+  overflow: visible;
+}
+
+.toolbarButton::after{
+  position: absolute;
+  display: inline-block;
+  top: 4px;
+  left: 25px;
+  font-size: 12px;
+  line-height: 17px;
+  white-space: nowrap;
+}
+@media screen and (max-width: 1000px){
+  .myToolbarButton{
+    min-width: 16px;
+  }
+  .toolbarButton::after{
+    display: none !important;
+  }
+  #viewFind{
+    margin-right: auto !important;
+  }
+  html[dir='ltr'] .download{
+    margin-right: auto !important;
+  }
+  html[dir='ltr'] .groupbtn-label{
+    padding-left: 0 !important;
+  }
+  html[dir='ltr'] .groupbtn-label::before{
+    display: none !important;
+  }
+  html[dir='ltr'] .toolbarButton.pageUp::before {
+    content: url(images/toolbarButton-pageUp.png) !important;
+  }
+  html[dir='rtl'] .toolbarButton.pageUp::before {
+    content: url(images/toolbarButton-pageUp-rtl.png) !important;
+  } 
+  html[dir='ltr'] .toolbarButton.pageDown::before {
+    content: url(images/toolbarButton-pageDown.png) !important;
+  }
+  html[dir='rtl'] .toolbarButton.pageDown::before {
+    content: url(images/toolbarButton-pageDown-rtl.png) !important;
+  }
+}
+html[dir='ltr'] .toolbarButton#sidebarToggle::after {
+  content: '目录';
+}
+
+html[dir='ltr'] .groupbtn-label{
+  padding-left: 33px;
+}
+html[dir='ltr'] .groupbtn-label::before{
+  position: absolute;
+  display: inline-block;
+  top: 5px;
+  left: 5px;
+  font-size: 12px;
+  line-height: 17px;
+  white-space: nowrap;
+  color: #fff;
+}
+html[dir='ltr'] .pagination::before{
+  content: '分页：';
+}
+html[dir='ltr'] .zoom::before{
+  content: '缩放：';
+}
+html[dir='ltr'] .rotate___::before{
+  content: '旋转：';
+}
+
+#presentationMode,#openFile,#print,#viewBookmark{
+  display: none !important;
+}
+
+/* html[dir='ltr'] .toolbarButton.pageUp::before {
+  content: url(images/toolbarButton-pageUp.png);
+}
+html[dir='rtl'] .toolbarButton.pageUp::before {
+  content: url(images/toolbarButton-pageUp-rtl.png);
+} 
+html[dir='ltr'] .toolbarButton.pageDown::before {
+  content: url(images/toolbarButton-pageDown.png);
+}
+html[dir='rtl'] .toolbarButton.pageDown::before {
+  content: url(images/toolbarButton-pageDown-rtl.png);
+}
+*/
+html[dir='ltr'] .toolbarButton.pageUp::before {
+  content: '上一页';
+}
+html[dir='rtl'] .toolbarButton.pageUp::before {
+  content: '上一页';
+}
+html[dir='ltr'] .toolbarButton.pageDown::before {
+  content: '下一页';
+}
+html[dir='rtl'] .toolbarButton.pageDown::before {
+  content: '下一页';
+}
+html[dir='ltr'] .download::after {
+  content: '下载';
+}
+html[dir='ltr'] .downloading::after {
+  content: '';
+}
+html[dir='ltr'] .downloading span{
+  white-space: nowrap;
+  width: auto;
+  height: auto;
+  margin-left: 15px;
+  text-align: left;
+  font-size: 12px;
+  overflow: visible;
+}
+#viewFind.toolbarButton::after {
+  content: '查找';
+}
+.toolbarButton.rotateCw::before {
+  content: url(images/secondaryToolbarButton-rotateCw.png);
+}
+.toolbarButton.rotateCcw::before {
+  content: url(images/secondaryToolbarButton-rotateCcw.png);
+}
+/* ---------------------tanglinhai end---------------------- */

@@ -678,9 +678,12 @@ let PDFViewerApplication = {
     loadingTask.onUnsupportedFeature = this.fallback.bind(this);
 
     return loadingTask.promise.then((pdfDocument) => {
-      this.appConfig.viewerLoadingTxt.innerHTML =
-  'PDF downloaded, currently loading PDF documents..., please wait a moment!';
-      this.appConfig.viewerLoading.style.display = 'block';
+      PDFViewerApplication.l10n.get('pdfDownLoadLoadingTxt2', null,
+          'An error occurred while loading the PDF.').
+          then((loadingMessage) => {
+        this.appConfig.viewerLoadingTxt.innerHTML = loadingMessage;
+        this.appConfig.viewerLoading.style.display = 'block';
+      });
       this.load(pdfDocument);
     }, (exception) => {
       if (loadingTask !== this.pdfLoadingTask) {
@@ -1493,7 +1496,7 @@ let PDFViewerApplication = {
 let validateFileURL;
 if (typeof PDFJSDev === 'undefined' || PDFJSDev.test('GENERIC')) {
   const HOSTED_VIEWER_ORIGINS = ['null',
-    'http://mozilla.github.io', 'https://mozilla.github.io'];
+    'http://mozilla.github.io', 'https://mozilla.github.io', window.location.protocol + '//' + window.location.host];
   validateFileURL = function validateFileURL(file) {
     if (file === undefined) {
       return;
@@ -1566,9 +1569,13 @@ function loadAndEnablePDFBug(enabledTabs) {
 
 function webViewerInitialized() {
   let appConfig = PDFViewerApplication.appConfig;
-  appConfig.viewerLoadingTxt.innerHTML =
-  'Download PDF files on the Internet... Please wait patiently!';
-  appConfig.viewerLoading.style.display = 'block';
+  PDFViewerApplication.l10n.get('pdfDownLoadLoadingTxt1', null,
+      'An error occurred while loading the PDF.').
+      then((loadingMessage) => {
+    appConfig.viewerLoadingTxt.innerHTML = loadingMessage;
+    appConfig.viewerLoading.style.display = 'block';
+  });
+  
   let file;
   if (typeof PDFJSDev === 'undefined' || PDFJSDev.test('GENERIC')) {
     let queryString = document.location.search.substring(1);
@@ -2025,6 +2032,7 @@ function webViewerFind(evt) {
     entireWord: evt.entireWord,
     highlightAll: evt.highlightAll,
     findPrevious: evt.findPrevious,
+    searchInCurrPage: evt.searchInCurrPage,
   });
 }
 
@@ -2036,6 +2044,8 @@ function webViewerFindFromUrlHash(evt) {
     entireWord: false,
     highlightAll: true,
     findPrevious: false,
+    page: evt.page, 
+    searchInCurrPage: evt.searchInCurrPage 
   });
 }
 

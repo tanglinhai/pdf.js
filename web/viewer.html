@@ -152,15 +152,15 @@ See https://github.com/adobe-type-tools/cmap-resources
               <span data-l10n-id="last_page_label">Go to Last Page</span>
             </button>
 
-            <div class="horizontalToolbarSeparator"></div>
-
+            <!-- ---------------------------tanglinhai start--------------------------- -->
+            <!-- <div class="horizontalToolbarSeparator"></div>
             <button id="pageRotateCw" class="secondaryToolbarButton rotateCw" title="Rotate Clockwise" tabindex="58" data-l10n-id="page_rotate_cw">
               <span data-l10n-id="page_rotate_cw_label">Rotate Clockwise</span>
             </button>
             <button id="pageRotateCcw" class="secondaryToolbarButton rotateCcw" title="Rotate Counterclockwise" tabindex="59" data-l10n-id="page_rotate_ccw">
               <span data-l10n-id="page_rotate_ccw_label">Rotate Counterclockwise</span>
-            </button>
-
+            </button> -->
+            <!-- ---------------------------tanglinhai end--------------------------- -->
             <div class="horizontalToolbarSeparator"></div>
 
             <button id="cursorSelectTool" class="secondaryToolbarButton selectTool toggled" title="Enable Text Selection Tool" tabindex="60" data-l10n-id="cursor_text_select_tool">
@@ -206,23 +206,23 @@ See https://github.com/adobe-type-tools/cmap-resources
           <div id="toolbarContainer">
             <div id="toolbarViewer">
               <div id="toolbarViewerLeft">
-                <button id="sidebarToggle" class="toolbarButton" title="Toggle Sidebar" tabindex="11" data-l10n-id="toggle_sidebar">
+                <button id="sidebarToggle" class="toolbarButton myToolbarButton" title="Toggle Sidebar" tabindex="11" data-l10n-id="toggle_sidebar">
                   <span data-l10n-id="toggle_sidebar_label">Toggle Sidebar</span>
                 </button>
                 <div class="toolbarButtonSpacer"></div>
-                <button id="viewFind" class="toolbarButton" title="Find in Document" tabindex="12" data-l10n-id="findbar">
+                <button id="viewFind" class="toolbarButton myToolbarButton" title="Find in Document" tabindex="12" data-l10n-id="findbar">
                   <span data-l10n-id="findbar_label">Find</span>
                 </button>
                 <div class="splitToolbarButton hiddenSmallView">
-                  <button class="toolbarButton pageUp" title="Previous Page" id="previous" tabindex="13" data-l10n-id="previous">
+                  <button class="toolbarButton pageUp myToolbarButton" title="Previous Page" id="previous" tabindex="13" data-l10n-id="previous">
                     <span data-l10n-id="previous_label">Previous</span>
                   </button>
                   <div class="splitToolbarButtonSeparator"></div>
-                  <button class="toolbarButton pageDown" title="Next Page" id="next" tabindex="14" data-l10n-id="next">
+                  <button class="toolbarButton pageDown myToolbarButton" title="Next Page" id="next" tabindex="14" data-l10n-id="next">
                     <span data-l10n-id="next_label">Next</span>
                   </button>
                 </div>
-                <input type="number" id="pageNumber" class="toolbarField pageNumber" title="Page" value="1" size="4" min="1" tabindex="15" data-l10n-id="page">
+                <input type="number" id="pageNumber" class="toolbarField pageNumber" title="Page" value="1" size="4" min="1" tabindex="15" data-l10n-id="page" autocomplete="off">
                 <span id="numPages" class="toolbarLabel"></span>
               </div>
               <div id="toolbarViewerRight">
@@ -230,21 +230,31 @@ See https://github.com/adobe-type-tools/cmap-resources
                   <span data-l10n-id="presentation_mode_label">Presentation Mode</span>
                 </button>
 
-                <button id="openFile" class="toolbarButton openFile hiddenLargeView" title="Open File" tabindex="32" data-l10n-id="open_file">
+                <button id="openFile" class="toolbarButton openFile hiddenLargeView" title="Open File" tabindex="32" data-l10n-id="open_file" style="display: none;">
                   <span data-l10n-id="open_file_label">Open</span>
                 </button>
-
-                <button id="print" class="toolbarButton print hiddenMediumView" title="Print" tabindex="33" data-l10n-id="print">
+                
+                <button id="print" class="toolbarButton print hiddenMediumView" title="Print" tabindex="33" data-l10n-id="print" style="display: none;">
                   <span data-l10n-id="print_label">Print</span>
                 </button>
 
-                <button id="download" class="toolbarButton download hiddenMediumView" title="Download" tabindex="34" data-l10n-id="download">
+                <button id="download" class="toolbarButton download hiddenMediumView myToolbarButton" title="Download" tabindex="34" data-l10n-id="download">
                   <span data-l10n-id="download_label">Download</span>
                 </button>
-                <a href="#" id="viewBookmark" class="toolbarButton bookmark hiddenSmallView" title="Current view (copy or open in new window)" tabindex="35" data-l10n-id="bookmark">
+                <a href="#" id="viewBookmark" class="toolbarButton bookmark hiddenSmallView" title="Current view (copy or open in new window)" tabindex="35" data-l10n-id="bookmark" style="display: none;">
                   <span data-l10n-id="bookmark_label">Current View</span>
                 </a>
-
+                <!-- ---------------------------tanglinhai start--------------------------- -->
+                <div class="splitToolbarButton groupbtn-label rotate___">
+                  <button id="pageRotateCw" class="toolbarButton rotateCw" title="Rotate Clockwise" tabindex="58" data-l10n-id="page_rotate_cw">
+                    <span data-l10n-id="page_rotate_cw_label">Rotate Clockwise</span>
+                  </button>
+                  <div class="splitToolbarButtonSeparator"></div>
+                  <button id="pageRotateCcw" class="toolbarButton rotateCcw" title="Rotate Counterclockwise" tabindex="59" data-l10n-id="page_rotate_ccw">
+                    <span data-l10n-id="page_rotate_ccw_label">Rotate Counterclockwise</span>
+                  </button>
+                </div>
+                <!-- ---------------------------tanglinhai end--------------------------- -->
                 <div class="verticalToolbarSeparator hiddenSmallView"></div>
 
                 <button id="secondaryToolbarToggle" class="toolbarButton" title="Tools" tabindex="36" data-l10n-id="tools">
@@ -307,8 +317,8 @@ See https://github.com/adobe-type-tools/cmap-resources
           <div class="viewerLoadingBg"></div>
           <div class="viewerLoadingCon">
             <img src="images/loading-small@2x.png">
-            <div id="viewerLoadingTxt" class="viewerLoadingTxt">
-              Download PDF Reader Components on the Internet...!
+            <div id="viewerLoadingTxt" class="viewerLoadingTxt" data-l10n-id="pdfDownLoadLoadingTxt">
+              DF阅读器正在下载组件！
             </div>
           </div>
         </div>
@@ -422,5 +432,19 @@ See https://github.com/adobe-type-tools/cmap-resources
 
     </div> <!-- outerContainer -->
     <div id="printContainer"></div>
+    <script type="text/javascript">
+      function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null)
+          return decodeURI(r[2]);
+        return null;
+      }
+      var canDownload = getQueryString('canDownload');
+      if(canDownload == 0){
+        document.getElementById('download').style.display = 'none';
+        document.getElementById('secondaryDownload').style.display = 'none';
+      }
+    </script>
   </body>
 </html>
