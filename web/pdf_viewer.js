@@ -12,28 +12,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { BaseViewer } from './base_viewer';
-import { getOffsetLeft } from './ui_utils';
-import { shadow } from 'pdfjs-lib';
+// ----------------------------- tanglinhai start ------------------------------
+import { getOffsetLeft } from './ui_utils.js';
+// ----------------------------- tanglinhai end ------------------------------
+import { BaseViewer } from "./base_viewer.js";
+import { shadow } from "pdfjs-lib";
 
 class PDFViewer extends BaseViewer {
-  get _setDocumentViewerElement() {
-    return shadow(this, '_setDocumentViewerElement', this.viewer);
+  get _viewerElement() {
+    return shadow(this, "_viewerElement", this.viewer);
   }
 
+  // ----------------------------- tanglinhai start ------------------------------
   _scrollIntoView({ pageView, pageSpot = null, pageNumber = null, }) {
+  // ----------------------------- tanglinhai end ------------------------------
     if (!pageSpot && !this.isInPresentationMode) {
+      // ----------------------------- tanglinhai start ------------------------------
       const pageDiv = pageView.div;
       const left = getOffsetLeft(pageView);
       const right = left + pageView.position.width;
+      /*const left = pageDiv.offsetLeft + pageDiv.clientLeft;
+      const right = left + pageDiv.clientWidth;*/
+      // ----------------------------- tanglinhai end ------------------------------
       const { scrollLeft, clientWidth, } = this.viewer;
       if (this._isScrollModeHorizontal ||
           left < scrollLeft || right > scrollLeft + clientWidth) {
         pageSpot = { left: 0, top: 0, };
       }
     }
+    // ----------------------------- tanglinhai start ------------------------------
     super._scrollIntoView({ pageView, pageSpot, pageNumber, });
+    // ----------------------------- tanglinhai end ------------------------------
   }
 
   _getVisiblePages() {
@@ -53,21 +62,25 @@ class PDFViewer extends BaseViewer {
     let stillFullyVisible = false;
 
     for (const page of visiblePages) {
-      if (page.percent < 100) {
+      // ----------------------------- tanglinhai start -----------------------------
+      if (page.view.percent < 100) {
+      // ----------------------------- tanglinhai end -----------------------------
         break;
       }
-      if (page.id === currentId) {
+      // ----------------------------- tanglinhai start -----------------------------
+      if (page.view.id === currentId) {
+      // ----------------------------- tanglinhai end -----------------------------
         stillFullyVisible = true;
         break;
       }
     }
     if (!stillFullyVisible) {
-      currentId = visiblePages[0].id;
+      // ----------------------------- tanglinhai start -----------------------------
+      currentId = visiblePages.length > 0 ? visiblePages[0].view.id : 1;
+      // ----------------------------- tanglinhai end -----------------------------
     }
     this._setCurrentPageNumber(currentId);
   }
 }
 
-export {
-  PDFViewer,
-};
+export { PDFViewer };

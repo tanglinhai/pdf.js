@@ -12,7 +12,7 @@ Build project and install the example dependencies:
 
 To build Browserify bundles, run `gulp build`. If you are running
 a web server, you can observe the build results at
-http://localhost:8888/examples/browserify/index.html
+http://localhost:8880/examples/browserify/index.html
 
 See main.js, worker.js and gulpfile.js files. Please notice that PDF.js
 packaging requires packaging of the main application and PDF.js worker code,

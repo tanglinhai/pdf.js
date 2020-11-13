@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
-import { BaseViewer } from './base_viewer';
-import { shadow } from 'pdfjs-lib';
+import { BaseViewer } from "./base_viewer.js";
+import { shadow } from "pdfjs-lib";
 
 class PDFSinglePageViewer extends BaseViewer {
   constructor(options) {
     super(options);
 
-    this.eventBus.on('pagesinit', (evt) => {
+    this.eventBus._on("pagesinit", evt => {
       // Since the pages are placed in a `DocumentFragment`, make sure that
       // the current page becomes visible upon loading of the document.
       this._ensurePageViewVisible();
     });
   }
 
-  get _setDocumentViewerElement() {
+  get _viewerElement() {
     // Since we only want to display *one* page at a time when using the
     // `PDFSinglePageViewer`, we cannot append them to the `viewer` DOM element.
     // Instead, they are placed in a `DocumentFragment`, and only the current
     // page is displayed in the viewer (refer to `this._ensurePageViewVisible`).
-    return shadow(this, '_setDocumentViewerElement', this._shadowViewer);
+    return shadow(this, "_viewerElement", this._shadowViewer);
   }
 
   _resetView() {
@@ -43,20 +43,23 @@ class PDFSinglePageViewer extends BaseViewer {
   }
 
   _ensurePageViewVisible() {
-    let pageView = this._pages[this._currentPageNumber - 1];
-    let previousPageView = this._pages[this._previousPageNumber - 1];
+    const pageView = this._pages[this._currentPageNumber - 1];
+    const previousPageView = this._pages[this._previousPageNumber - 1];
 
-    let viewerNodes = this.viewer.childNodes;
+    const viewerNodes = this.viewer.childNodes;
     switch (viewerNodes.length) {
       case 0: // Should *only* occur on initial loading.
         this.viewer.appendChild(pageView.div);
+	/* ---------------------------------- tanglinhai start ------------------------------------ */
         pageView.isDivAddedToContainer = true;
         this.viewer._buffer.push(pageView);
+	/* ---------------------------------- tanglinhai end ------------------------------------ */
         break;
       case 1: // The normal page-switching case.
         if (viewerNodes[0] !== previousPageView.div) {
           throw new Error(
-            '_ensurePageViewVisible: Unexpected previously visible page.');
+            "_ensurePageViewVisible: Unexpected previously visible page."
+          );
         }
         if (pageView === previousPageView) {
           break; // The correct page is already visible.
@@ -64,13 +67,16 @@ class PDFSinglePageViewer extends BaseViewer {
         // Switch visible pages, and reset the viewerContainer scroll position.
         this._shadowViewer.appendChild(previousPageView.div);
         this.viewer.appendChild(pageView.div);
+	/* ---------------------------------- tanglinhai start ------------------------------------ */
         pageView.isDivAddedToContainer = true;
         this.viewer._buffer.push(pageView);
+	/* ---------------------------------- tanglinhai end ------------------------------------ */
         this.container.scrollTop = 0;
         break;
       default:
         throw new Error(
-          '_ensurePageViewVisible: Only one page should be visible at a time.');
+          "_ensurePageViewVisible: Only one page should be visible at a time."
+        );
     }
     this._previousPageNumber = this._currentPageNumber;
   }
@@ -81,8 +87,9 @@ class PDFSinglePageViewer extends BaseViewer {
     }
     super._scrollUpdate();
   }
-
+  // ----------------------------- tanglinhai start ------------------------------
   _scrollIntoView({ pageView, pageSpot = null, pageNumber = null, }) {
+  // ----------------------------- tanglinhai end ------------------------------
     if (pageNumber) { // Ensure that `this._currentPageNumber` is correct.
       this._setCurrentPageNumber(pageNumber);
     }
@@ -93,7 +100,9 @@ class PDFSinglePageViewer extends BaseViewer {
     // even if the current position doesn't change when the page is scrolled.
     this.update();
 
+    // ----------------------------- tanglinhai start ------------------------------
     super._scrollIntoView({ pageView, pageSpot, pageNumber, });
+    // ----------------------------- tanglinhai end ------------------------------
 
     // Since scrolling is tracked using `requestAnimationFrame`, update the
     // scroll direction during the next `this._scrollUpdate` invocation.
@@ -107,18 +116,16 @@ class PDFSinglePageViewer extends BaseViewer {
     return this._getCurrentVisiblePage();
   }
 
-  _updateHelper(visiblePages) { }
+  _updateHelper(visiblePages) {}
 
   get _isScrollModeHorizontal() {
     // The Scroll/Spread modes are never used in `PDFSinglePageViewer`.
-    return shadow(this, '_isScrollModeHorizontal', false);
+    return shadow(this, "_isScrollModeHorizontal", false);
   }
 
-  _updateScrollMode() { }
+  _updateScrollMode() {}
 
-  _updateSpreadMode() { }
+  _updateSpreadMode() {}
 }
 
-export {
-  PDFSinglePageViewer,
-};
+export { PDFSinglePageViewer };

@@ -63,15 +63,17 @@ class PDFRenderingQueue {
    * @param {Boolean} reInitPageContainer When updating, you need to
    * set up a page container.
    */
+  /* ---------------------------------- tanglinhai start ------------------------------------ */
   renderHighestPriority(currentlyVisiblePages, reInitPageContainer) {
+  /* ---------------------------------- tanglinhai end ------------------------------------ */
     if (this.idleTimeout) {
       clearTimeout(this.idleTimeout);
       this.idleTimeout = null;
     }
-
     // Pages have a higher priority than thumbnails, so check them first.
-    if (this.pdfViewer.forceRendering(currentlyVisiblePages,
-                                              reInitPageContainer)) {
+    /* ---------------------------------- tanglinhai start ------------------------------------ */
+    if (this.pdfViewer.forceRendering(currentlyVisiblePages, reInitPageContainer)) {
+    /* ---------------------------------- tanglinhai end ------------------------------------ */
       return;
     }
     // No pages needed rendering, so check thumbnails.
@@ -106,33 +108,37 @@ class PDFRenderingQueue {
      * 2. if last scrolled down, the page after the visible pages, or
      *    if last scrolled up, the page before the visible pages
      */
-    let visibleViews = visible.views;
+    const visibleViews = visible.views;
 
-    let numVisible = visibleViews.length;
+    const numVisible = visibleViews.length;
     if (numVisible === 0) {
       return null;
     }
     for (let i = 0; i < numVisible; ++i) {
-      let view = visibleViews[i].view;
+      const view = visibleViews[i].view;
       if (!this.isViewFinished(view)) {
         return view;
       }
     }
-
+    // ------------------------------ tanglinhai start ---------------------------------
+    // 当可见部分渲染完毕之后，继续渲染距离最近可视部分的页面，这个不需要影响性能，关闭
     // All the visible views have rendered; try to render next/previous pages.
     /* if (scrolledDown) {
-      let nextPageIndex = visible.last.id;
+      const nextPageIndex = visible.last.id;
       // IDs start at 1, so no need to add 1.
       if (views[nextPageIndex] && !this.isViewFinished(views[nextPageIndex])) {
         return views[nextPageIndex];
       }
     } else {
-      let previousPageIndex = visible.first.id - 2;
-      if (views[previousPageIndex] &&
-          !this.isViewFinished(views[previousPageIndex])) {
+      const previousPageIndex = visible.first.id - 2;
+      if (
+        views[previousPageIndex] &&
+        !this.isViewFinished(views[previousPageIndex])
+      ) {
         return views[previousPageIndex];
       }
     } */
+    // ------------------------------ tanglinhai end ---------------------------------
     // Everything that needs to be rendered has been.
     return null;
   }
@@ -151,6 +157,7 @@ class PDFRenderingQueue {
    * `false`.
    *
    * @param {IRenderableView} view
+     ---------------------------------- tanglinhai start ------------------------------------
    * @param {
    *    id: view.id,
    *    x: pageLeft,
@@ -158,8 +165,11 @@ class PDFRenderingQueue {
    *    view{PDFPageView},
    *    percent,
    *  } visiblePages
+     ---------------------------------- tanglinhai end ------------------------------------
    */
-  renderView(view, visiblePages) {
+  /* ---------------------------------- tanglinhai start ------------------------------------ */
+  renderView(view/*, visiblePages*/) {
+  /* ---------------------------------- tanglinhai end ------------------------------------ */
     switch (view.renderingState) {
       case RenderingStates.FINISHED:
         return false;
@@ -172,15 +182,17 @@ class PDFRenderingQueue {
         break;
       case RenderingStates.INITIAL:
         this.highestPriorityPage = view.renderingId;
+        // ----------------------------- tanglinhai start ------------------------------
         // Caching pages being rendered.
-        if (visiblePages) {
+        /*if (visiblePages) {
           view.viewer.renderingCache.push(view);
-        }
+        }*/
         view.draw().finally(() => {
           // render pages
-          if (visiblePages) {
+          /*if (visiblePages) {
             // Stop rendering pages in the last scroll visual area.
             if (view.viewer.visiblePagesCache.indexOf(visiblePages) === -1) {
+              console.log('==============stop rendering pages in the last scroll visual area. ==============', view);
               return;
             }
             // Pages rendered are deleted from the cache.
@@ -195,24 +207,32 @@ class PDFRenderingQueue {
             }
             // All pages are rendered.
             if (visibles.length === 0) {
+              console.log('=================All pages are rendered.================');
               return;
             }
             visiblePages.first = visibles[0];
             visiblePages.last = visibles[visibles.length - 1];
             const first = visibles[0], last = visibles[visibles.length - 1];
             this.renderHighestPriority(visiblePages);
-          } else {
-            // render thumbnail
-            this.renderHighestPriority();
+          }*/
+          this.renderHighestPriority();
+        }).catch(reason => {
+          if (reason instanceof RenderingCancelledException) {
+            return;
           }
+          console.error(`renderView: "${reason}"`);
         });
+
+        /*view.draw().finally(() => {
+            this.renderHighestPriority();
+          }).catch(reason => {
+            console.error(`renderView: "${reason}"`);
+          });*/
+        // ----------------------------- tanglinhai end ------------------------------
         break;
     }
     return true;
   }
 }
 
-export {
-  RenderingStates,
-  PDFRenderingQueue,
-};
+export { RenderingStates, PDFRenderingQueue };

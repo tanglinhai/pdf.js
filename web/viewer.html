@@ -32,21 +32,77 @@ See https://github.com/adobe-type-tools/cmap-resources
 <!--#endif-->
     <title>PDF.js viewer</title>
 
-<!--#if FIREFOX || MOZCENTRAL-->
+<!--#if MOZCENTRAL-->
 <!--#include viewer-snippet-firefox-extension.html-->
 <!--#endif-->
 <!--#if CHROME-->
 <!--#include viewer-snippet-chrome-extension.html-->
 <!--#endif-->
 
-    <link rel="stylesheet" href="viewer.css">
+    <link rel="stylesheet" href="viewer.css?v=6">
 <!--#if !PRODUCTION-->
     <link rel="resource" type="application/l10n" href="locale/locale.properties">
 <!--#endif-->
-
+<!-- ================================== tanglinhai start =================================== -->
+    <script type="text/javascript">
+      if (!Array.prototype.findIndex) {
+          Object.defineProperty(Array.prototype, 'findIndex', {
+            value: function(predicate) {
+             // 1. Let O be ? ToObject(this value).
+              if (this == null) {
+                throw new TypeError('"this" is null or not defined');
+              }
+        
+              var o = Object(this);
+        
+              // 2. Let len be ? ToLength(? Get(O, "length")).
+              var len = o.length >>> 0;
+        
+              // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+              if (typeof predicate !== 'function') {
+                throw new TypeError('predicate must be a function');
+              }
+        
+              // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+              var thisArg = arguments[1];
+        
+              // 5. Let k be 0.
+              var k = 0;
+        
+              // 6. Repeat, while k < len
+              while (k < len) {
+                // a. Let Pk be ! ToString(k).
+                // b. Let kValue be ? Get(O, Pk).
+                // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
+                // d. If testResult is true, return k.
+                var kValue = o[k];
+                if (predicate.call(thisArg, kValue, k, o)) {
+                  return k;
+                }
+                // e. Increase k by 1.
+                k++;
+              }
+        
+              // 7. Return -1.
+              return -1;
+            }
+          });
+        }
+    </script>
+<!-- ================================== tanglinhai end =================================== -->
 <!--#if !PRODUCTION-->
-    <script src="../node_modules/systemjs/dist/system.js"></script>
-    <script src="../systemjs.config.js"></script>
+    <script defer src="../node_modules/es-module-shims/dist/es-module-shims.js"></script>
+    <script type="importmap-shim">
+      {
+        "imports": {
+          "pdfjs/": "../src/",
+          "pdfjs-lib": "../src/pdf.js",
+          "pdfjs-web/": "./"
+        }
+      }
+    </script>
+
+    <script src="viewer.js?v=6" type="module-shim"></script>
 <!--#endif-->
 
 <!--#if (GENERIC && !MINIFIED) -->
@@ -54,7 +110,7 @@ See https://github.com/adobe-type-tools/cmap-resources
 <!--#endif-->
 
 <!--#if !MINIFIED -->
-    <script src="viewer.js"></script>
+<!--<script src="viewer.js"></script>-->
 <!--#else-->
 <!--#include viewer-snippet-minified.html-->
 <!--#endif-->
@@ -92,7 +148,7 @@ See https://github.com/adobe-type-tools/cmap-resources
       <div id="mainContainer">
         <div class="findbar hidden doorHanger" id="findbar">
           <div id="findbarInputContainer">
-            <input id="findInput" class="toolbarField" title="Find" placeholder="Find in document…" tabindex="91" data-l10n-id="find_input">
+            <input id="findInput" class="toolbarField" title="Find" placeholder="Find in document…" tabindex="91" data-l10n-id="find_input" autocomplete="off">
             <div class="splitToolbarButton">
               <button id="findPrevious" class="toolbarButton findPrevious" title="Find the previous occurrence of the phrase" tabindex="92" data-l10n-id="find_previous">
                 <span data-l10n-id="find_previous_label">Previous</span>
@@ -152,7 +208,7 @@ See https://github.com/adobe-type-tools/cmap-resources
               <span data-l10n-id="last_page_label">Go to Last Page</span>
             </button>
 
-            <!-- ---------------------------tanglinhai start--------------------------- -->
+            <!-- ================================== tanglinhai start =================================== -->
             <!-- <div class="horizontalToolbarSeparator"></div>
             <button id="pageRotateCw" class="secondaryToolbarButton rotateCw" title="Rotate Clockwise" tabindex="58" data-l10n-id="page_rotate_cw">
               <span data-l10n-id="page_rotate_cw_label">Rotate Clockwise</span>
@@ -160,7 +216,7 @@ See https://github.com/adobe-type-tools/cmap-resources
             <button id="pageRotateCcw" class="secondaryToolbarButton rotateCcw" title="Rotate Counterclockwise" tabindex="59" data-l10n-id="page_rotate_ccw">
               <span data-l10n-id="page_rotate_ccw_label">Rotate Counterclockwise</span>
             </button> -->
-            <!-- ---------------------------tanglinhai end--------------------------- -->
+            <!-- ================================== tanglinhai end =================================== -->
             <div class="horizontalToolbarSeparator"></div>
 
             <button id="cursorSelectTool" class="secondaryToolbarButton selectTool toggled" title="Enable Text Selection Tool" tabindex="60" data-l10n-id="cursor_text_select_tool">
@@ -244,8 +300,8 @@ See https://github.com/adobe-type-tools/cmap-resources
                 <a href="#" id="viewBookmark" class="toolbarButton bookmark hiddenSmallView" title="Current view (copy or open in new window)" tabindex="35" data-l10n-id="bookmark" style="display: none;">
                   <span data-l10n-id="bookmark_label">Current View</span>
                 </a>
-                <!-- ---------------------------tanglinhai start--------------------------- -->
-                <div class="splitToolbarButton groupbtn-label rotate___">
+                <!-- ================================== tanglinhai start =================================== -->
+                <div class="splitToolbarButton groupbtn-label rotate___ hiddenLargeView">
                   <button id="pageRotateCw" class="toolbarButton rotateCw" title="Rotate Clockwise" tabindex="58" data-l10n-id="page_rotate_cw">
                     <span data-l10n-id="page_rotate_cw_label">Rotate Clockwise</span>
                   </button>
@@ -254,7 +310,7 @@ See https://github.com/adobe-type-tools/cmap-resources
                     <span data-l10n-id="page_rotate_ccw_label">Rotate Counterclockwise</span>
                   </button>
                 </div>
-                <!-- ---------------------------tanglinhai end--------------------------- -->
+                <!-- ================================== tanglinhai end =================================== -->
                 <div class="verticalToolbarSeparator hiddenSmallView"></div>
 
                 <button id="secondaryToolbarToggle" class="toolbarButton" title="Tools" tabindex="36" data-l10n-id="tools">
@@ -313,15 +369,17 @@ See https://github.com/adobe-type-tools/cmap-resources
         <div id="viewerContainer" tabindex="0">
           <div id="viewer" class="pdfViewer"></div>
         </div>
+		<!-- ================================== tanglinhai start =================================== -->
         <div id="viewerLoading" class="viewerLoading">
           <div class="viewerLoadingBg"></div>
           <div class="viewerLoadingCon">
             <img src="images/loading-small@2x.png">
             <div id="viewerLoadingTxt" class="viewerLoadingTxt" data-l10n-id="pdfDownLoadLoadingTxt">
-              DF阅读器正在下载组件！
+              PDF阅读器正在下载组件！
             </div>
           </div>
         </div>
+		<!-- ================================== tanglinhai end =================================== -->
         <div id="errorWrapper" hidden='true'>
           <div id="errorMessageLeft">
             <span id="errorMessage"></span>
@@ -409,7 +467,7 @@ See https://github.com/adobe-type-tools/cmap-resources
             </div>
           </div>
         </div>
-<!--#if !(FIREFOX || MOZCENTRAL)-->
+<!--#if !MOZCENTRAL-->
         <div id="printServiceOverlay" class="container hidden">
           <div class="dialog">
             <div class="row">
@@ -432,6 +490,7 @@ See https://github.com/adobe-type-tools/cmap-resources
 
     </div> <!-- outerContainer -->
     <div id="printContainer"></div>
+	<!-- ================================== tanglinhai start =================================== -->
     <script type="text/javascript">
       function getQueryString(name) {
         var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
@@ -446,5 +505,6 @@ See https://github.com/adobe-type-tools/cmap-resources
         document.getElementById('secondaryDownload').style.display = 'none';
       }
     </script>
+	<!-- ================================== tanglinhai end =================================== -->
   </body>
 </html>
